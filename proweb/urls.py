@@ -20,4 +20,7 @@ from member import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.dblink),
+    path('login/', views.login),
+    path('member_add/', views.member_add),
+    path('member_edit/', views.member_edit),
 ]

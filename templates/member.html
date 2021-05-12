@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row tm-mt-big">
+    <div class="col-6 mx-auto tm-login">
+        <div class="bg-white tm-block">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="tm-block-title">{{ title_txt }}</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div id="error_msg" class="col-12" style="display:none">
+                    <div class="alert alert-danger" role="alert"></div>
+                </div>
+                <div class="col-12">
+                    <form id="form_data" class="tm-signup-form" data-toggle="validator" role="form">
+                        <input id="action_type" name="action_type" type="hidden" value="{{ action_type }}">
+                        <div class="row">
+                            <div class="col-6">
+                                <label>登入帳號</label>
+                                <input id="account" name="account" type="text" class="form-control" required>                  
+                            </div>
+                            <div class="col-6">
+                                <label>姓名</label>
+                                <input id="name" name="name" type="text" class="form-control validate" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <label>登入密碼</label>
+                                <input id="password" name="password" type="password" class="form-control" value="" required>                  
+                            </div>
+                            <div class="col-6">
+                                <label>確認密碼</label>
+                                <input id="confirm_password" name="confirm_password" type="password" class="form-control validate" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <label>性別</label>
+                                <div class="col-12">
+                                    <div class="form-check form-check-inline">
+                                      <input class="form-check-input" type="radio" name="sex" id="sex_1" value="1" {{ checked_1 }}>
+                                      <label class="form-check-label" for="inlineRadio1">男</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                      <input class="form-check-input" type="radio" name="sex" id="sex_2" value="2" {{ checked_2 }}>
+                                      <label class="form-check-label" for="inlineRadio2">女</label>
+                                    </div> 
+                                </div>              
+                            </div>
+                            <div class="col-6">
+                                <label>生日</label>
+                                <input type="date" id="birthday" name="birthday" class="form-control datepicker" value="">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <label>手機號碼</label>
+                                <input id="phone" name="phone" type="text" class="form-control validate">                  
+                            </div>
+                            <div class="col-6">
+                                <label>電子郵件</label>
+                                <input id="email" name="email" type="email" class="form-control validate">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>地址</label>
+                            <input id="addr" name="addr" type="text" class="form-control validate">
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-sm-6">
+                                <button type="button" class="btn btn-primary" onclick="member_submit('{{ action_type }}');">送出</button>
+                                <button type="button" class="btn btn-primary" onclick="('/login')">取消</button>
+                            </div>
+                            <div class="col-12 col-sm-6 tm-btn-right" style="display:{{ btn_none }}">
+                                <button type="button" class="btn btn-danger" onclick="member_submit('delete')">刪除帳號</button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
