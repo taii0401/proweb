@@ -9,30 +9,30 @@
                 </div>
             </div>
             <div class="row">
-                <div id="error_msg" class="col-12" style="display:none">
-                    <div class="alert alert-danger" role="alert"></div>
+                <div id="error_msg_div" class="col-12" style="display:none">
+                    <div id="error_msg" class="alert alert-danger" role="alert"></div>
                 </div>
                 <div class="col-12">
-                    <form id="form_data" class="tm-signup-form" data-toggle="validator" role="form">
+                    <form id="form_data" class="tm-signup-form" method="post">
                         <input id="action_type" name="action_type" type="hidden" value="{{ action_type }}">
                         <div class="row">
                             <div class="col-6">
                                 <label>登入帳號</label>
-                                <input id="account" name="account" type="text" class="form-control" required>                  
+                                <input id="account" name="account" type="text" class="form-control require" value="" {{ disabled }} placeholder="不得超過30個英文字或數字">                  
                             </div>
                             <div class="col-6">
                                 <label>姓名</label>
-                                <input id="name" name="name" type="text" class="form-control validate" required>
+                                <input id="name" name="name" type="text" class="form-control require" value="">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-6">
                                 <label>登入密碼</label>
-                                <input id="password" name="password" type="password" class="form-control" value="" required>                  
+                                <input id="password" name="password" type="password" class="form-control require" value="" placeholder="不得超過30個英文字或數字">                  
                             </div>
                             <div class="col-6">
                                 <label>確認密碼</label>
-                                <input id="confirm_password" name="confirm_password" type="password" class="form-control validate" required>
+                                <input id="confirm_password" name="confirm_password" type="password" class="form-control require" placeholder="請輸入相同的登入密碼">
                             </div>
                         </div>
                         <div class="row">
@@ -57,16 +57,16 @@
                         <div class="row">
                             <div class="col-6">
                                 <label>手機號碼</label>
-                                <input id="phone" name="phone" type="text" class="form-control validate">                  
+                                <input id="phone" name="phone" type="text" class="form-control">                  
                             </div>
                             <div class="col-6">
                                 <label>電子郵件</label>
-                                <input id="email" name="email" type="email" class="form-control validate">
+                                <input id="email" name="email" type="email" class="form-control">
                             </div>
                         </div>
                         <div class="form-group">
                             <label>地址</label>
-                            <input id="addr" name="addr" type="text" class="form-control validate">
+                            <input id="addr" name="addr" type="text" class="form-control">
                         </div>
                         <div class="row">
                             <div class="col-12 col-sm-6">
