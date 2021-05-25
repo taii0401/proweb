@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row tm-mt-big">
+    <div class="col-12 mx-auto tm-login-col">
+        <div class="bg-white tm-block">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <i class="fas fa-3x fa-tachometer-alt tm-site-icon text-center"></i>
+                    <h2 class="tm-block-title mt-3">忘記密碼</h2>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div id="error_msg_div" class="col-12" style="display:none">
+                    <div id="error_msg" class="alert alert-danger" role="alert"></div>
+                </div>
+                <div class="col-12">
+                    <form action="index.html" method="post" class="tm-login-form">
+                        <div class="input-group">
+                            <label for="username" class="col-xl-2 col-lg-2 col-md-2 col-sm-5 col-form-label">帳號</label>
+                            <input id="username" name="username" type="text" class="form-control require">
+                        </div>
+                        <div class="input-group mt-3">
+                            <label for="password" class="col-xl-2 col-lg-2 col-md-2 col-sm-5 col-form-label">姓名</label>
+                            <input id="name" name="name" type="name" class="form-control require">
+                        </div>
+                        <div class="input-group mt-3">
+                            <div class="col-4"></div>
+                            <div class="col-3">
+                                <button type="button" class="btn btn-primary d-inline-block mx-auto" onclick="user_login()">送出</button>
+                            </div>
+                            <div class="col-3">
+                                <button type="button" class="btn btn-primary" onclick="changeForm('/user/login')">取消</button>
+                            </div>
+                            <div class="col-2"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
