@@ -36,10 +36,17 @@
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link d-flex" href="login.html">
-                            <i class="far fa-user mr-2 tm-logout-icon"></i>
-                            <span>Logout</span>
-                        </a>
+                        {% if username %}
+                            <a class="nav-link d-flex" href="/user/logout">
+                                <i class="far fa-user mr-2 tm-logout-icon"></i>
+                                <span>{{ username }}  登出</span>
+                            </a>
+                        {% else %}
+                            <a class="nav-link d-flex" href="/user/login">
+                                <i class="far fa-user mr-2 tm-logout-icon"></i>
+                                <span>登入</span>
+                            </a>
+                        {% endif %}
                     </li>
                 </ul>
             </div>

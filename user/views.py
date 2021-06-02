@@ -1,5 +1,11 @@
+from django.db import models
 from django.shortcuts import render,redirect
+#JSON
 from django.http import JsonResponse
+#使用者權限
+from django.contrib.auth.models import User
+from django.contrib import auth
+#使用者資料
 from user.models import proweb_user
 
 # Create your views here.
@@ -35,53 +41,42 @@ def login(request):
             pass
         
         if post_username != "" and post_password != "":
-            user = proweb_user.objects.get(username=post_username)
-            #print(user)
+            try:
+                user = User.objects.get(username=post_username)
+                if user.password == post_password:
+                    request.session["username"] = user.username
+                    request.session["password"] = user.password
+                    return redirect("/user/user_data/edit")
+                else:
+                    message = "請確認帳號或密碼！"
+            except:
+                message = "請確認帳號或密碼！"
         else:
             message = "請輸入帳號和密碼！"
-
-
-
-        """
-        #try:
-            user = models.proweb_user.objects.get(account=post_account)
-            print(user)
-            if user.password == post_password:
-                request.session["account"] = post_account
-                request.session["password"] = post_password
-                return redirect("/user/user_data/edit")
-        #except:
-            #pass
-        
-        if login_form.is_valid():
-            account = request.POST["account"]
-            password = request.POST["password"]
-            msg = "登入成功"
-        else:
-            msg = "請檢查帳號密碼！"
-        """
     else:
         pass
-    
-    """
-    try:
-        if account in request.session:
-            request.session["account"] = account
-        if password in request.session:
-            request.session["password"] = password    
-    except:
-        pass
-    """
 
     return render(request,"login.html",locals())
 
 #登出
-#def logout(request):
-    #request.session["account"] = None
-    #return redirect("/")
+def logout(request):
+    del request.session["username"]
+    del request.session["password"]
+    return redirect("/user/login")
 
 #新增、編輯帳號
 def user_data(request,action_type="add"):
+    username = password = ""
+    #登入帳號
+    if "username" in request.session and request.session["username"] != "":
+        username = request.session["username"]
+    #登入密碼
+    if "password" in request.session and request.session["password"] != "":
+        password = request.session["password"]
+    #若有登入帳號及密碼，並點選註冊，則改為編輯帳號頁面
+    if username != "" and password != "":
+        action_type = "edit"
+
     if action_type == "add": #新增
         title_txt = "申請帳號"
         #隱藏按鈕-刪除帳號
@@ -92,6 +87,7 @@ def user_data(request,action_type="add"):
         title_txt = "修改帳號"
         #不可編輯欄位-帳號
         disabled = "disabled"
+    
     return render(request,"user_data.html",locals())
 
 #忘記密碼

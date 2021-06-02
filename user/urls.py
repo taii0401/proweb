@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('login/', views.login),
+    path('logout/', views.logout),
     path('user_data/<str:action_type>/', views.user_data), #新增、編輯帳號
     path('user_forget/', views.user_forget),
 
