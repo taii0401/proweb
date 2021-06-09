@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <!-- 模版 -->
     <link rel="stylesheet" href="{% static 'css/tooplate.css' %}">
+    <!-- 日期 -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker.css' %}">
+    
 </head>
 
 <body class="bg02">
@@ -26,5 +29,17 @@
 <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
 <script src="{% static 'js/common.js' %}"></script>
-
+<!-- 日期 -->
+<script src="{% static 'js/bootstrap-datepicker.min.js' %}"></script>
+<script src="{% static 'js/bootstrap-datepicker.zh-TW.min.js' %}"></script>
+<script>
+    $(function () {
+        $('.datetimepicker').datepicker({
+            language: 'zh-TW', //中文化
+            format: 'yyyy-mm-dd', //格式
+            autoclose: true, //選擇日期後就會自動關閉
+            todayHighlight: true //今天會有一個底色
+        });
+    });
+</script>
 </html>
