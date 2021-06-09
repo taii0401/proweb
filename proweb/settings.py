@@ -25,7 +25,8 @@ SECRET_KEY = 'h_%*!v^!it8l6e#$l@j$r1(8@+y1%swb&fpq)$zg%p-4hxpe=@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#*代表所有人都可以瀏覽
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -78,6 +79,8 @@ WSGI_APPLICATION = 'proweb.wsgi.application'
 
 DATABASES = {
     'default': {
+    #'ENGINE': 'django.db.backends.sqlite3',
+    #'NAME': 'os.path.join(BASE_DIR, 'db.sqlite3')',
     'ENGINE': 'django.db.backends.mysql',
     'NAME': 'proweb',
     'USER':'root',
@@ -118,7 +121,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False #True會將時區減8
 
 
 # Static files (CSS, JavaScript, Images)
