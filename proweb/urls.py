@@ -20,7 +20,7 @@ from user import views
 
 urlpatterns = [
     #path('admin', admin.site.urls),
-    path('', views.user_forget), #首頁
+    path('', views.user_data), #首頁
     path('user/',include('user.urls')),
     path('product/',include('product.urls')),
 ]
