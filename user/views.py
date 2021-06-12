@@ -26,6 +26,23 @@ def dblink(request,db_name):
     	result = "連接資料庫失敗："+str(e)
     return render(request,"dblink.html",locals())
 
+#取得數字和字母隨機位數
+def getRandom(num):
+    import random
+    ran_str = ""
+    for i in range(0,num): 
+        #定義一個隨機範圍，去猜i的值。
+        current = random.randint(0,num) 
+        if current == i:                                
+            #生成一個隨機的數字
+            current_code = random.randint(0,9)
+        else:                                           
+            #生成一個隨機的字母，這裡一定要主義chr（）轉換一下
+            current_code = chr(random.randint(65,90))
+        ran_str += str(current_code)
+    
+    return ran_str
+
 #登入
 def login(request):
     if request.method == "POST":
@@ -161,26 +178,29 @@ def ajax_user_forget(request):
     error = True
     message = "請確認資料！"
     if request.method == "POST":
-        post_username = post_email = ""
+        post_username = ""
         if "username" in request.POST and request.POST["username"].strip() != "":
             post_username = request.POST["username"].strip()
         else:
             message = "請輸入帳號！"
             pass
-        if "email" in request.POST and request.POST["email"].strip() != "":
-            post_email = request.POST["email"].strip()
-        else:
-            message = "請輸入電子郵件！"
-            pass
         
-        if post_username != "" and post_email != "":
+        if post_username != "":
             try:
-                auth_user = User.objects.get(username=post_username,email=post_email)
-                if auth_user.password != "":
+                auth_user = User.objects.get(username=post_username,email=post_username)
+                #隨機產生6位數
+                ran_str = getRandom(6)
+                try:
+                    #設定密碼
+                    auth_user.set_password(ran_str)
+                    #儲存
+                    auth_user.save()
                     error = False
-                    message = "密碼："+auth_user.password
+                    message = "密碼："+ran_str+"  請重新登入後，至修改密碼更新！"
+                except:
+                    pass
             except:
-                message = "請確認帳號和電子郵件！"
+                message = "請確認帳號！"
 
     return_data = {"error":error,"message":message}
     #print(return_data)
@@ -279,6 +299,7 @@ def ajax_user_data(request):
                     if auth_user is not None and auth_user.is_active:
                         if "password" in request.POST and auth_user.password != request.POST["password"]:
                             try:
+                                #設定密碼
                                 auth_user.set_password(request.POST["password"])
                                 #儲存
                                 auth_user.save()

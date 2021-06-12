@@ -10,28 +10,24 @@
                 </div>
             </div>
             <div class="row mt-2">
-                <div id="error_msg_div" class="col-12" style="display:none">
-                    <div id="error_msg" class="alert alert-danger" role="alert"></div>
-                </div>
+                <div id="msg_error" class="col-12 alert alert-danger" role="alert" style="display:none;"></div>
+                <div id="msg_success" class="col-12 alert alert-success" role="alert" style="display:none;"></div>
                 <div class="col-12">
-                    <form action="index.html" method="post" class="tm-login-form">
-                        <div class="input-group">
+                    <form id="form_data" class="tm-signup-form" method="post">
+                        {% csrf_token %}
+                        <div class="input-group mt-3">
                             <label for="username" class="col-xl-2 col-lg-2 col-md-2 col-sm-5 col-form-label">帳號</label>
-                            <input id="username" name="username" type="text" class="form-control require">
+                            <input type="email" id="username" name="username" class="form-control require" placeholder="電子郵件">
                         </div>
                         <div class="input-group mt-3">
-                            <label for="password" class="col-xl-2 col-lg-2 col-md-2 col-sm-5 col-form-label">姓名</label>
-                            <input id="name" name="name" type="name" class="form-control require">
-                        </div>
-                        <div class="input-group mt-3">
-                            <div class="col-4"></div>
+                            <div class="col-3"></div>
                             <div class="col-3">
-                                <button type="button" class="btn btn-primary d-inline-block mx-auto" onclick="user_login()">送出</button>
+                                <button type="button" class="btn btn-primary d-inline-block mx-auto" onclick="userForget()">送出</button>
                             </div>
                             <div class="col-3">
                                 <button type="button" class="btn btn-primary" onclick="changeForm('/user/login')">取消</button>
                             </div>
-                            <div class="col-2"></div>
+                            <div class="col-3"></div>
                         </div>
                     </form>
                 </div>
