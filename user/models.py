@@ -2,6 +2,7 @@ from django.db import models
 
 
 # Create your models here.
+#使用者資料表
 class proweb_user(models.Model):
     uuid = models.UUIDField(default="",null=False)
     user_id = models.IntegerField(default=0,null=False,unique=True)
@@ -22,6 +23,7 @@ class proweb_user(models.Model):
     class Meta:
         db_table = "proweb_user" #定義資料表名稱
 
+#檔案資料表
 class proweb_file(models.Model):
     name = models.CharField(max_length=255,default="",null=True)
     path = models.CharField(max_length=255,default="",null=True)
