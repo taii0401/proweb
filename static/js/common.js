@@ -22,6 +22,52 @@ function changeForm(url) {
     }
 }
 
+//全選
+function checkAll() {
+    if($('#check_all').prop('checked')) {
+        $('.check_list').prop('checked',true);
+    } else {
+        $('.check_list').prop('checked',false);           
+    }
+	
+	$('.check_list').each(function(i) {
+        //console.log(this.value);
+        checkId(this.value);
+    });
+}
+
+//勾選
+var checkboxId = new Array();
+function checkId(id) {
+	var check = $('#checkbox_'+id).prop('checked');
+	if(check) {
+		checkboxId.push(id);
+	} else {
+		removeArray(checkboxId, id);
+	}
+	
+	$('#checkList').val(checkboxId);
+	//console.log("checkboxId:"+checkboxId);
+
+    if(checkboxId != '') {
+        $('.check_btn').css('display','');
+    } else {
+        $('.check_btn').css('display','none');
+    }
+}
+
+//移除陣列元素
+function removeArray(arr) {
+	var what, a = arguments, L = a.length, ax;
+	while(L > 1 && arr.length) {
+		what = a[--L];
+		while((ax= arr.indexOf(what)) !== -1) {
+			arr.splice(ax, 1);
+		}
+	}
+	return arr;
+}
+
 //檢查必填欄位(class對應的欄位,是否顯示錯誤訊息區)
 function checkRequiredClass(classStr,isShowMsg) {
 	var class_arr = classStr.split(',');
