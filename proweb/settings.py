@@ -132,3 +132,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
+
+#全域變數
+GLOBAL_PAGE_NUM = 20
+
