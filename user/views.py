@@ -43,6 +43,23 @@ def getRandom(num):
     
     return ran_str
 
+######################################## 頁面 start ########################################
+#首頁
+def index(request):
+    username = password = ""
+    #登入帳號
+    if "username" in request.session and request.session["username"] != "":
+        username = request.session["username"]
+    #登入密碼
+    if "password" in request.session and request.session["password"] != "":
+        password = request.session["password"]
+    if username != "" and password != "":
+        #跳至頁面-使用者資料
+        return redirect("/user/user_data/edit")
+    else:
+        #跳至頁面-登入
+        return redirect("/user/login")
+
 #登入
 def login(request):
     if request.method == "POST":
@@ -145,6 +162,8 @@ def user_data(request,action_type="add"):
 def user_forget(request):
     title_txt = "忘記密碼"
     return render(request,"user_forget.html",locals())
+
+######################################## 頁面 end ########################################
 
 
 
