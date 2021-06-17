@@ -192,7 +192,7 @@ def ajax_user_exist(request):
     #print(return_data)
     return JsonResponse(return_data)
 
-#AJAX-檢查忘記密碼資料(未完成)
+#AJAX-檢查忘記密碼資料
 def ajax_user_forget(request):
     error = True
     message = "請確認資料！"
