@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block title %} {{ title_txt }} {% endblock %}
 {% block content %}
 <div class="row tm-mt-big">
     <div class="col-12 mx-auto tm-login">
@@ -76,10 +77,10 @@
                         <div class="row">
                             <div class="col-12 col-sm-6">
                                 <button type="button" class="btn btn-primary" onclick="userSubmit('{{ action_type }}');">送出</button>
-                                <button type="button" class="btn btn-primary" onclick="changeForm('/')">取消</button>
+                                <button type="button" class="btn btn-danger" onclick="changeForm('/')">取消</button>
                             </div>
                             <div class="col-12 col-sm-6 tm-btn-right" style="display:{{ btn_none }}">
-                                <button type="button" class="btn btn-danger" onclick="userSubmit('delete')">刪除帳號</button>
+                                <button type="button" class="btn btn-danger" onclick="userSubmit('delete');">刪除帳號</button>
                             </div>
                         </div>
 
@@ -89,4 +90,17 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block js %} 
+<script>
+    $(function () {
+        $('.datetimepicker').datepicker({
+            language: 'zh-TW', //中文化
+            format: 'yyyy-mm-dd', //格式
+            autoclose: true, //選擇日期後就會自動關閉
+            todayHighlight: true //今天會有一個底色
+        });
+    });
+</script>
 {% endblock %}
