@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block title %} 忘記密碼 {% endblock %}
 {% block content %}
 <div class="row tm-mt-big">
     <div class="col-12 mx-auto tm-login-col">
@@ -25,7 +26,7 @@
                                 <button type="button" class="btn btn-primary d-inline-block mx-auto" onclick="userForget()">送出</button>
                             </div>
                             <div class="col-3">
-                                <button type="button" class="btn btn-primary" onclick="changeForm('/user/login')">取消</button>
+                                <button type="button" class="btn btn-danger" onclick="changeForm('/user/login')">取消</button>
                             </div>
                             <div class="col-3"></div>
                         </div>
