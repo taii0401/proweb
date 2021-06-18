@@ -28,7 +28,7 @@ class proweb_file(models.Model):
     name = models.CharField(max_length=255,default="",null=True)
     path = models.CharField(max_length=255,default="",null=True)
     size = models.CharField(max_length=30,default="",null=True)
-    type = models.CharField(max_length=30,default="",null=True)
+    types = models.CharField(max_length=30,default="",null=True)
 
     def __str__(self):
         return self.name
