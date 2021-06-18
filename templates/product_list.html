@@ -1,22 +1,44 @@
 {% extends "base.html" %}
+{% block title %} 商品列表 {% endblock %}
 {% block content %}
-<input type="hidden" id="checkList" name="checkList" value="">
+<form id="form_data" class="tm-signup-form" method="post">
+    {% csrf_token %}
+    <input type="hidden" id="action_type" name="action_type" value="{{ action_type }}">
+    <input type="hidden" id="check_list" name="check_list" value="">
+</form>
 <div class="row tm-content-row tm-mt-big">
     <div class="col-xl-12 col-lg-12 tm-md-12 tm-sm-12 tm-col">
         <div class="bg-white tm-block h-100">
-            <!--<div class="row">
-                <div class="col-md-8 col-sm-12">
-                    <h2 class="tm-block-title d-inline-block"></h2>
+            <div class="row">
+                <div class="form-group col-md-4 col-sm-12">
+                    <div class="input-group">
+                        <input type="text" id="keywords" name="keywords" class="form-control search_input_data" placeholder="編號、名稱" value="{{ keywords }}">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" onclick="getSearchUrl('/product/product_list/');"><i class="fas fa-search"></i></button>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <input type="hidden" id="types" name="types" class="form-control search_input_data" value="{{ types }}">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            類別
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                          {% for code_id,code_cname in code_options.items %}
+                          <a class="dropdown-item {{ active }}" href="#" onclick="$('#types').val('{{ code_id }}');getSearchUrl('/product/product_list/');">{{ code_cname }}</a>
+                          {% endfor %}
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-4 col-sm-12 text-right">
                     <button type="button" class="btn btn-primary" onclick="changeForm('/product/product_data/add');">新增</button>
-                    <button type="button" class="btn btn-danger check_btn" style="display:none">刪除</button>
+                    <button type="button" class="btn btn-danger check_btn" style="display:none" onclick="productSubmit('delete_list');">刪除</button>
                 </div>
-            </div>-->
+            </div>
             <div class="tm-table-mt tm-table-actions-row">
                 <div class="tm-table-actions-col-left">
-                    <button type="button" class="btn btn-primary" onclick="changeForm('/product/product_data/add');">新增</button>
-                    <button type="button" class="btn btn-danger check_btn" style="display:none">刪除</button>
+                    
                 </div>
                 <div class="tm-table-actions-col-right">
                     {% include "page.html" %}
@@ -46,17 +68,17 @@
                             <td scope="row">
                                 <div class="custom-control custom-checkbox">
                                     <input id="checkbox_{{ data.uuid }}" type="checkbox" value="{{ data.uuid }}" name="check_list[]" onclick="checkId('{{ data.uuid }}')" class="check_list">
-                                    <label for="checkbox_{data.uuid}"></label>
+                                    <label for="checkbox_{{ data.uuid }}"></label>
                                 </div>
                             </td>
                             <td class="tm-product-name">{{ data.name }}</td>
                             <td class="text-center">{{ data.serial }}</td>
-                            <td class="text-center">{{ type_name }}</td>
+                            <td class="text-center">{{ types_name }}</td>
                             <td class="text-center">{{ data.price }}</td>
                             <td class="text-center">{{ data.sales }}</td>
                             <td class="text-center">
                                 <i class="fas fa-edit tm-edit-icon"></i>
-                                <i class="fas fa-trash-alt tm-trash-icon"></i>
+                                <i class="fas fa-trash-alt tm-trash-icon" onclick="$('#check_list').val('{{ data.uuid }}');productSubmit('delete_list');"></i>
                             </td>
                         </tr>
                         {% empty %}
