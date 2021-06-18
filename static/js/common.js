@@ -22,6 +22,33 @@ function changeForm(url) {
     }
 }
 
+//依搜尋條件產生URL
+function getSearchUrl(path,is_return=false) {
+    var url = path;
+
+    i = 0;
+    $('.search_input_data').each(function() {
+        input_id = this.id
+        input_value = $(this).val();
+        if(input_id != "" && input_value != "") {
+            if(i == 0) {
+                url += '?';
+            } else {
+                url += ';';
+            }
+            url += input_id+'='+input_value;
+            i++;
+        }
+    });
+
+    //console.log(url);
+    if(is_return) { //回傳URL
+        return url;
+    } else {
+        changeForm(url);
+    }
+}
+
 //全選
 function checkAll() {
     if($('#check_all').prop('checked')) {
@@ -46,7 +73,7 @@ function checkId(id) {
 		removeArray(checkboxId, id);
 	}
 	
-	$('#checkList').val(checkboxId);
+	$('#check_list').val(checkboxId);
 	//console.log("checkboxId:"+checkboxId);
 
     if(checkboxId != '') {
@@ -243,8 +270,7 @@ function userSubmit(action_type) {
         if(checkFormat('confirm_password',$('#confirm_password').val(),0,true) == false) {
             return false;
         }
-	}
-    if(action_type == 'edit') { //編輯
+	} else if(action_type == 'edit') { //編輯
 	    //檢查商品頁面網址
         if($('#short_link').val() != '') {
             if(checkFormat('en_number',$('#short_link').val(),100,true) == false) {
@@ -257,8 +283,7 @@ function userSubmit(action_type) {
                 return false;
             }
         }
-    }
-    if(action_type == 'delete') { //刪除
+    } else if(action_type == 'delete') { //刪除
         var yes = confirm("你確定要刪除嗎？");
         if(!yes) {
             return false;
@@ -292,6 +317,58 @@ function userSubmit(action_type) {
                     alert("刪除成功！");
                     changeForm('/user/logout');
                 }
+            } else if(response.error == true) {
+                showMsg('msg_error',response.message,true);
+                return false;
+            } else {
+                alert('傳送錯誤！');
+                return false;
+            }
+        }
+    });
+}
+
+//送出-商品資料
+function productSubmit(action_type) {
+    $('#action_type').val(action_type);
+    //檢查必填
+    if(checkRequiredClass('require',true) == false) {
+		return false;
+	}
+	if(action_type == 'add') { //新增
+        
+	} else if(action_type == 'edit') { //編輯
+	    
+    } else if(action_type == 'delete' || action_type == 'delete_list') { //刪除、刪除-列表勾選多筆
+        var yes = confirm("你確定要刪除嗎？");
+        if(!yes) {
+            return false;
+        }
+    }
+
+    $('.form-control').attr('disabled',false);
+    
+    $.ajax({
+        type: 'POST',
+        url: '/product/ajax_product_data/',
+        dataType: 'json',
+        data: $('#form_data').serialize(),
+        error: function(xhr) {
+            //console.log(xhr);
+            alert('傳送錯誤！');
+            return false;
+        },
+        success: function(response) {
+            //console.log(response);
+            if(response.error == false) {
+                if(action_type == 'add') { //新增
+                    alert("新增成功！");
+                } else if(action_type == 'edit') { //編輯
+                    alert("編輯成功！");
+                } else if(action_type == 'delete' || action_type == 'delete_list') { //刪除、刪除-列表勾選多筆
+                    alert("刪除成功！");
+                }
+                changeForm('/product/product_list');
             } else if(response.error == true) {
                 showMsg('msg_error',response.message,true);
                 return false;
