@@ -2,13 +2,13 @@ from django.db import models
 from django.shortcuts import render,redirect
 #JSON
 from django.http import JsonResponse
+#搜尋條件-OR
+from django.db.models import Q
 #使用者權限
 from django.contrib.auth.models import User
 from django.contrib import auth
 #商品資料
 from product.models import proweb_code,proweb_product
-
-#from django.db.mode1s import Q
 
 import datetime
 
@@ -102,22 +102,14 @@ def product_list(request):
 
     #搜尋條件-類別選項
     code_options = getCodeOptions("product_category")
-    """
-    for code_id,code_cname in code_options.items():
-        if code_id == 1:
-            active = "active"
-        else:
-            active = ""
-    """
 
     #取得代碼名稱
     code_datas = getCode({},"cname")
     #print(code_datas)
-    
 
     #取得目前頁數
     cur_page = 1
-    search_get_url = keywords = types = ""
+    search_get_url = keywords = types = select_types = ""
     if request.method == "GET":
         if "cur_page" in request.GET and request.GET["cur_page"] != "":
             cur_page = request.GET["cur_page"]
@@ -127,33 +119,43 @@ def product_list(request):
         if "types" in request.GET and request.GET["types"] != "": #類別
             types = request.GET["types"]
             search_get_url += ";types="+types
-            
+            select_types = int(types) #搜尋條件-選單選取需轉換型態判斷
     
     try:
         auth_user = User.objects.get(username=username,password=password)
         #取得使用者資料
         if auth_user.id > 0:
             try:
-                conds = {}
-                conds["user_id"] = auth_user.id
-                conds["is_delete"] = 0
-                if keywords != "": #關鍵字
-                    #contains_list = [Q(name__contains=keywords),Q(serial__icontains=keywords)]
-                    #conds["name__contains"] = keywords
-                    conds["serial__icontains"] = keywords
+                conds = Q()
+                conds_and = Q()
+                conds_and.connector = "AND"
+                conds_and.children.append(("user_id",auth_user.id))
+                conds_and.children.append(("is_delete",0))
                 if types != "": #類別
-                    conds["types"] = types
+                    conds_and.children.append(("types",types))
+                if keywords != "": #關鍵字
+                    conds_or = Q()
+                    conds_or.connector = "OR"
+                    conds_or.children.append(("name__icontains",keywords))
+                    conds_or.children.append(("serial__icontains",keywords))
+                    conds.add(conds_or,"AND")
+                conds.add(conds_and,"AND")
+                #print(conds)
                 #取得資料
-                all_datas = proweb_product.objects.filter(**conds).order_by("serial").values()
+                all_datas = proweb_product.objects.filter(conds).order_by("serial").values()
                 #取得分頁
                 page_data = getPage(request,cur_page,all_datas)
                 if "list_data" in page_data:
                     datas = page_data["list_data"]
                     for data in datas:
-                        #類別名稱
+                        #轉換名稱-類別
                         types_name = ""
                         if data["types"] in code_datas and code_datas[data["types"]] != "":
                             types_name = code_datas[data["types"]]
+                        #轉換名稱-是否顯示
+                        is_display_name = "否"
+                        if data["is_display"] == 1:
+                            is_display_name = "是"
             except:
                 pass
     except:
