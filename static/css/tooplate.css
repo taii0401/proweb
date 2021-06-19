@@ -413,6 +413,12 @@ footer {
   max-width: 600px;
 }
 
+/*下拉選單-選取的顏色*/
+.dropdown-menu a.active {
+  color:black;
+  background-color: #cdd4da;
+}
+
 @media (min-width: 992px) {
   .navbar-expand-lg .navbar-nav .nav-link {
     padding: 15px 20px;
