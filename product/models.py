@@ -1,4 +1,6 @@
 from django.db import models
+from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
 
 # Create your models here.
 #代碼表
@@ -30,8 +32,8 @@ class proweb_product(models.Model):
     publish = models.DateField(default="",null=True,blank=True)
     price = models.IntegerField(default=0,null=False)
     sales = models.IntegerField(default=0,null=False)
-    content = models.TextField(blank=True)
-    category = models.TextField(blank=True)
+    content = RichTextUploadingField()
+    category = RichTextUploadingField()
     click = models.IntegerField(default=0,null=False)
     is_delete = models.IntegerField(default=0,null=False)
     is_display = models.IntegerField(default=1,null=False)
