@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'ckeditor', #編輯器
+    'ckeditor_uploader', #編輯器-上傳檔案
     'user',
     'product',
     'report',
@@ -79,14 +81,14 @@ WSGI_APPLICATION = 'proweb.wsgi.application'
 
 DATABASES = {
     'default': {
-    #'ENGINE': 'django.db.backends.sqlite3',
-    #'NAME': 'os.path.join(BASE_DIR, 'db.sqlite3')',
-    'ENGINE': 'django.db.backends.mysql',
-    'NAME': 'proweb',
-    'USER':'root',
-    'PASSWORD':'root',
-    'HOST':'127.0.0.1',
-    'PORT':'3306',
+        #'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'proweb',
+        'USER':'root',
+        'PASSWORD':'root',
+        'HOST':'127.0.0.1',
+        'PORT':'3306',
     }
 }
 
@@ -132,7 +134,54 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
+#執行完python manage.py collectstatic後註解
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+#放在django專案根目錄，同時也需要新建media資料夾
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+CKEDITOR_UPLOAD_PATH = 'static/upload/'
+
+
+"""
+#編輯器
+CKEDITOR_JQUERY_URL = 'https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js'
+CKEDITOR_IMAGE_BACKEND = 'pillow' #用於生成圖片縮略圖
+CKEDITOR_UPLOAD_PATH = 'static/upload/'
+CKEDITOR_CONFIGS = {
+    'default': {
+        # 使用簡體中文
+        'language':'zh-cn',
+        # 編輯器的寬高請根據你的頁面自行設定
+        'width':'auto',
+        'height':'600px',
+        'image_previewText':' ',
+        'tabSpaces': 4,
+        'toolbar': 'Custom',
+        # 新增按鈕在這裡
+        'toolbar_Custom': [
+            ['Styles','Format','Bold','Italic','Underline','Strike','SpellChecker','Undo','Redo'],
+            ['Link','Unlink'],
+            ['Image','Table','HorizontalRule'],
+            ['TextColor','BGColor'],
+            ['Smiley','SpecialChar'], 
+            ['Source'],
+            ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
+            ['NumberedList','BulletedList'],
+            ['Indent','Outdent'],
+            ['Maximize'],
+        ],
+        # 外掛
+        'extraPlugins': ','.join(['codesnippet','uploadimage','widget','lineutils',]),
+    },
+
+     
+}
+"""
 
 #全域變數
-GLOBAL_PAGE_NUM = 5
+GLOBAL_PAGE_NUM = 10
 
+"""
+    """
