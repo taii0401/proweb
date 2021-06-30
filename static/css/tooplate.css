@@ -261,6 +261,7 @@ label {
 .table td,
 .table th {
   padding: 20px 24px;
+  vertical-align: middle;
 }
 
 .table-hover tbody tr:hover {
@@ -382,7 +383,7 @@ input[type="checkbox"]:focus {
 }
 
 .tm-edit-icon:hover {
-  color: #00bfff;
+  color: #3aabd0;
 }
 
 .tm-edit-icon-cell {
@@ -417,6 +418,19 @@ footer {
 .dropdown-menu a.active {
   color:black;
   background-color: #cdd4da;
+}
+
+/*列表-按鈕並排加框*/
+.btn-action {
+  width: 45px;
+  height: 45px;
+  margin: 0px 3px;
+  border: 1px solid #cccccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c8c8c8;
+  float:left;
 }
 
 @media (min-width: 992px) {
