@@ -3,8 +3,8 @@
 {% block css %} 
 <style>
     #div_img { 
-        width:100px; 
-        height:100px; 
+        width:80px; 
+        height:80px; 
         margin:5px auto; 
         position:relative; 
         text-align: center; 
@@ -63,7 +63,7 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table table-hover table-striped tm-table-striped-even mt-3">
+                <table class="table table-hover table-striped tm-table-striped-even mt-3"  style="vertical-align: middle;">
                     <thead>
                         <tr class="tm-bg-gray">
                             <th scope="col" class="text-center" style="width:1%;">
@@ -79,7 +79,7 @@
                             <th scope="col" class="text-center" style="width:8%;">價錢</th>
                             <th scope="col" class="text-center" style="width:8%;">售價</th>
                             <th scope="col" class="text-center" style="width:8%;">顯示</th>
-                            <th scope="col" class="text-center" style="width:8%;">動作</th>
+                            <th scope="col" class="text-center" style="width:12%;">動作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,7 +94,7 @@
                             <td class="text-center">{{ data.serial }}</td>
                             <td class="text-center">
                                 <div id="div_img"> 
-                                    <img src="http://photosku.com/images_file/small_images/s000_496.jpg" width="100px" height="auto"> 
+                                    <img src="http://photosku.com/images_file/small_images/s000_496.jpg" width="80px" height="80px"> 
                                 </div> 
                             </td>
                             <td class="tm-product-name">{{ data.name }}</td>
@@ -103,8 +103,14 @@
                             <td class="text-center">{{ data.sales }}</td>
                             <td class="text-center">{{ is_display_name }}</td>
                             <td class="text-center">
-                                <i class="fas fa-edit tm-edit-icon"></i>
-                                <i class="fas fa-trash-alt tm-trash-icon" onclick="$('#check_list').val('{{ data.uuid }}');productSubmit('delete_list');"></i>
+                                <div class="col">
+                                    <div class="btn-action">
+                                        <i class="fas fa-edit tm-edit-icon" onclick="changeForm('/product/product_data/edit?uuid={{ data.uuid }}');"></i>
+                                    </div>
+                                    <div class="btn-action">
+                                        <i class="fas fa-trash-alt tm-trash-icon" onclick="$('#check_list').val('{{ data.uuid }}');productSubmit('delete_list');"></i>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         {% empty %}
@@ -128,7 +134,7 @@
 </div>
 {% endblock %}
 
-{% block js %} 
+{% block script %} 
 <script type="text/javascript"> 
     $(function(){ 
         $('#div_img img').mouseenter(function(){ 
