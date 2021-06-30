@@ -34,9 +34,10 @@ def getCode(conds={},return_col=""):
     return data
 
 #依類型取得代碼選項
-def getCodeOptions(code_type=""):
+def getCodeOptions(code_type="",is_all=False):
     data = {}
-    data[""] = "全部"
+    if is_all:
+        data[""] = "全部"
 
     conds = {}
     conds["types"] = code_type
@@ -92,7 +93,6 @@ def getPage(request,cur_page="",datas={}):
 #商品列表
 def product_list(request):
     acion = "/product/product_list"
-    post_username = post_password = ""
     #登入帳號
     if "username" in request.session and request.session["username"] != "":
         username = request.session["username"]
@@ -100,68 +100,109 @@ def product_list(request):
     if "password" in request.session and request.session["password"] != "":
         password = request.session["password"]
 
-    #搜尋條件-類別選項
-    code_options = getCodeOptions("product_category")
+    if username != "" and password != "":
+        #搜尋條件-類別選項
+        code_options = getCodeOptions("product_category",True)
 
-    #取得代碼名稱
-    code_datas = getCode({},"cname")
-    #print(code_datas)
+        #取得代碼名稱
+        code_datas = getCode({},"cname")
+        #print(code_datas)
 
-    #取得目前頁數
-    cur_page = 1
-    search_get_url = keywords = types = select_types = ""
-    if request.method == "GET":
-        if "cur_page" in request.GET and request.GET["cur_page"] != "":
-            cur_page = request.GET["cur_page"]
-        if "keywords" in request.GET and request.GET["keywords"] != "": #關鍵字
-            keywords = request.GET["keywords"].strip()
-            search_get_url += ";keywords="+keywords
-        if "types" in request.GET and request.GET["types"] != "": #類別
-            types = request.GET["types"]
-            search_get_url += ";types="+types
-            select_types = int(types) #搜尋條件-選單選取需轉換型態判斷
-    
-    try:
-        auth_user = User.objects.get(username=username,password=password)
-        #取得使用者資料
-        if auth_user.id > 0:
-            try:
-                conds = Q()
-                conds_and = Q()
-                conds_and.connector = "AND"
-                conds_and.children.append(("user_id",auth_user.id))
-                conds_and.children.append(("is_delete",0))
-                if types != "": #類別
-                    conds_and.children.append(("types",types))
-                if keywords != "": #關鍵字
-                    conds_or = Q()
-                    conds_or.connector = "OR"
-                    conds_or.children.append(("name__icontains",keywords))
-                    conds_or.children.append(("serial__icontains",keywords))
-                    conds.add(conds_or,"AND")
-                conds.add(conds_and,"AND")
-                #print(conds)
-                #取得資料
-                all_datas = proweb_product.objects.filter(conds).order_by("serial").values()
-                #取得分頁
-                page_data = getPage(request,cur_page,all_datas)
-                if "list_data" in page_data:
-                    datas = page_data["list_data"]
-                    for data in datas:
-                        #轉換名稱-類別
-                        types_name = ""
-                        if data["types"] in code_datas and code_datas[data["types"]] != "":
-                            types_name = code_datas[data["types"]]
-                        #轉換名稱-是否顯示
-                        is_display_name = "否"
-                        if data["is_display"] == 1:
-                            is_display_name = "是"
-            except:
-                pass
-    except:
-        pass
+        #取得目前頁數
+        cur_page = 1
+        search_get_url = keywords = types = select_types = ""
+        if request.method == "GET":
+            if "cur_page" in request.GET and request.GET["cur_page"] != "":
+                cur_page = request.GET["cur_page"]
+            if "keywords" in request.GET and request.GET["keywords"] != "": #關鍵字
+                keywords = request.GET["keywords"].strip()
+                search_get_url += ";keywords="+keywords
+            if "types" in request.GET and request.GET["types"] != "": #類別
+                types = request.GET["types"]
+                search_get_url += ";types="+types
+                select_types = int(types) #搜尋條件-選單選取需轉換型態判斷
+        
+        try:
+            auth_user = User.objects.get(username=username,password=password)
+            #取得使用者資料
+            if auth_user.id > 0:
+                try:
+                    conds = Q()
+                    conds_and = Q()
+                    conds_and.connector = "AND"
+                    conds_and.children.append(("user_id",auth_user.id))
+                    conds_and.children.append(("is_delete",0))
+                    if types != "": #類別
+                        conds_and.children.append(("types",types))
+                    if keywords != "": #關鍵字
+                        conds_or = Q()
+                        conds_or.connector = "OR"
+                        conds_or.children.append(("name__icontains",keywords))
+                        conds_or.children.append(("serial__icontains",keywords))
+                        conds.add(conds_or,"AND")
+                    conds.add(conds_and,"AND")
+                    #print(conds)
+                    #取得資料
+                    all_datas = proweb_product.objects.filter(conds).order_by("serial").values()
+                    #取得分頁
+                    page_data = getPage(request,cur_page,all_datas)
+                    if "list_data" in page_data:
+                        datas = page_data["list_data"]
+                        for data in datas:
+                            #轉換名稱-類別
+                            types_name = ""
+                            if data["types"] in code_datas and code_datas[data["types"]] != "":
+                                types_name = code_datas[data["types"]]
+                            #轉換名稱-是否顯示
+                            is_display_name = "否"
+                            if data["is_display"] == 1:
+                                is_display_name = "是"
+                except:
+                    pass
+        except:
+            pass
     
     return render(request,"product_list.html",locals())
+
+#新增、編輯商品
+def product_data(request,action_type="add"):
+    username = password = ""
+    #登入帳號
+    if "username" in request.session and request.session["username"] != "":
+        username = request.session["username"]
+    #登入密碼
+    if "password" in request.session and request.session["password"] != "":
+        password = request.session["password"]
+    #若有登入帳號及密碼，並點選註冊，則改為編輯帳號頁面
+    if username != "" and password != "":
+        try:
+            auth_user = User.objects.get(username=username,password=password)
+            #取得使用者資料
+            if auth_user.id > 0:
+                #類別選項
+                code_options = getCodeOptions("product_category")
+                #目前先預設-書籍
+                select_types = 1
+
+                if action_type == "add": #新增
+                    title_txt = "新增商品"
+                    #隱藏按鈕-刪除商品
+                    btn_none = "none"
+                    
+                elif action_type == "edit": #編輯
+                    title_txt = "編輯商品"
+                    uuid = ""
+                    #取得UUID
+                    if request.method == "GET":
+                        if "uuid" in request.GET and request.GET["uuid"] != "":
+                            uuid = request.GET["uuid"]
+                    
+                    #依UUID取得資料
+                    if uuid != "":
+                        data = proweb_product.objects.get(uuid=uuid)
+        except:
+            pass
+    return render(request,"product_data.html",locals())
 
 ######################################## 頁面 end ########################################
 
@@ -198,7 +239,27 @@ def ajax_product_data(request):
             if action_type == "add": #新增
                 pass    
             elif action_type == "edit": #編輯
-                pass
+                uuid = request.POST["uuid"] if "uuid" in request.POST else ""
+                #取得商品資料
+                data = proweb_product.objects.get(uuid=uuid)
+                if post_user_id == data.user_id:
+                    #商品資料
+                    data.name = request.POST["name"] if "name" in request.POST and request.POST["name"] != "" else ""
+                    data.author = request.POST["author"] if "author" in request.POST and request.POST["author"] != "" else ""
+                    data.office = request.POST["office"] if "office" in request.POST and request.POST["office"] != "" else ""
+                    data.publish = request.POST["publish"] if "publish" in request.POST and request.POST["publish"] != "" else datetime.datetime.now().strftime("%Y-%m-%d")
+                    data.price = request.POST["price"] if "price" in request.POST and request.POST["price"] != "" else 0
+                    data.sales = request.POST["sales"] if "sales" in request.POST and request.POST["sales"] != "" else data.price
+                    data.content = request.POST["content"] if "content" in request.POST and request.POST["content"] != "" else ""
+                    data.category = request.POST["category"] if "category" in request.POST and request.POST["category"] != "" else ""
+                    data.modify_time = now
+                    print(request.POST["content"])
+                    #print(data.content)
+                    #儲存
+                    data.save()
+                    error = False
+                else:
+                    message = "沒有編輯權限！"
             elif action_type == "delete": #刪除
                 """
                 if "uuid" in request.POST and request.POST["uuid"] != "":
