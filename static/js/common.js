@@ -338,13 +338,16 @@ function productSubmit(action_type) {
 	if(action_type == 'add') { //新增
         
 	} else if(action_type == 'edit') { //編輯
-	    
+        
     } else if(action_type == 'delete' || action_type == 'delete_list') { //刪除、刪除-列表勾選多筆
         var yes = confirm("你確定要刪除嗎？");
         if(!yes) {
             return false;
         }
     }
+
+    CKEDITOR.instances['content'].updateElement();
+	CKEDITOR.instances['category'].updateElement();
 
     $('.form-control').attr('disabled',false);
     
@@ -364,11 +367,13 @@ function productSubmit(action_type) {
                 if(action_type == 'add') { //新增
                     alert("新增成功！");
                 } else if(action_type == 'edit') { //編輯
+                    uuid = $('#uuid').val();
                     alert("編輯成功！");
+                    changeForm('/product/product_data/edit?uuid='+uuid);
                 } else if(action_type == 'delete' || action_type == 'delete_list') { //刪除、刪除-列表勾選多筆
                     alert("刪除成功！");
+                    changeForm('/product/product_list');
                 }
-                changeForm('/product/product_list');
             } else if(response.error == true) {
                 showMsg('msg_error',response.message,true);
                 return false;
