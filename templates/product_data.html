@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} {{ title_txt }} {% endblock %}
+{% block content %}
+<div class="row tm-mt-big">
+    <div class="col-12 mx-auto tm-login">
+        <div class="bg-white tm-block">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="tm-block-title">{{ title_txt }}</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div id="msg_error" class="col-12 alert alert-danger" role="alert" style="display:none;"></div>
+                <div id="msg_success" class="col-12 alert alert-success" role="alert" style="display:none;"></div>
+                <div class="col-12">
+                    <form id="form_data" class="tm-signup-form" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" id="action_type" name="action_type" value="{{ action_type }}">
+                        <input type="hidden" id="user_id" name="user_id" value="{{ auth_user.id }}">
+                        <input type="hidden" id="uuid" name="uuid" value="{{ data.uuid }}">
+                        <div class="row">
+                            <div class="col-3">
+                                產品編號：{{ data.serial }}
+                            </div>
+                            <!--<div class="col-3">
+                                <label>類別：</label>
+                                <div class="col-12">
+                                    {% for code_id,code_cname in code_options.items %}
+                                    <div class="form-check form-check-inline">
+                                      <input class="form-check-input" type="radio" name="types" id="types_{{ code_id }}" value="{{ code_id }}" {% ifequal code_id select_types %} checked {% endifequal %} disabled>
+                                      <label class="form-check-label" for="types_{{ code_id }}">{{ code_cname }}</label>
+                                    </div>
+                                    {% endfor %}
+                                </div>              
+                            </div>-->
+                            <div class="col-3">
+                                <label>是否顯示：</label>
+                            </div>
+                            <div class="col-6">
+                                <label>名稱：</label>
+                                <input type="text" id="name" name="name" class="form-control require" value="{{ data.name }}">
+                            </div>
+                            <div class="col-4">
+                                <label>作者：</label>
+                                <input type="text" id="author" name="author" class="form-control require" value="{{ data.author }}">
+                            </div>
+                            <div class="col-4">
+                                <label>出版社：</label>
+                                <input type="text" id="office" name="office" class="form-control require" value="{{ data.office }}">
+                            </div>
+                            <div class="col-4">
+                                <label>出版日期：</label>
+                                <div class="input-group date" id="input_datetimepicker" data-target-input="nearest">
+                                    <input type="text" id="publish" name="publish" class="form-control datetimepicker require" data-target="#input_datetimepicker"  value="{{ data.publish|date:'Y-m-d' }}" />
+                                    <div class="input-group-append" data-target="#input_datetimepicker" data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <label>原價：</label>
+                                <input type="number" id="price" name="price" class="form-control require" value="{{ data.price }}">
+                            </div>
+                            <div class="col-4">
+                                <label>售價：</label>
+                                <input type="number" id="sales" name="sales" class="form-control" value="{{ data.sales }}">
+                            </div>
+                            <div class="col-12">
+                                <label>內容簡介：</label>
+                                <textarea id="content" name="content" class="form-control">{{ data.content|safe }}</textarea>
+                            </div>
+                            <div class="col-12">
+                                <label><br/>目錄：</label>
+                                <textarea id="category" name="category" class="form-control">{{ data.category|safe }}</textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <label><br/>上傳圖片：</label>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12 col-sm-6">
+                                <button type="button" class="btn btn-primary" onclick="productSubmit('{{ action_type }}');">送出</button>
+                                <button type="button" class="btn btn-danger" onclick="changeForm('/product/product_list')">取消</button>
+                            </div>
+                            <div class="col-12 col-sm-6 tm-btn-right" style="display:{{ btn_none }}">
+                                <button type="button" class="btn btn-danger" onclick="productSubmit('delete');">刪除商品</button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<!-- 編輯器 -->
+<script src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+<script>
+    $(function () {
+        $('.datetimepicker').datepicker({
+            language: 'zh-TW', //中文化
+            format: 'yyyy-mm-dd', //格式
+            autoclose: true, //選擇日期後就會自動關閉
+            todayHighlight: true //今天會有一個底色
+        });
+        CKEDITOR.replace('content');
+        CKEDITOR.replace('category');
+    });
+</script>
+{% endblock %}
