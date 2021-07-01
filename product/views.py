@@ -89,6 +89,19 @@ def getPage(request,cur_page="",datas={}):
 
     return page_data
 
+#取得最後編號
+def getSerial(conds={}):
+    serial_num = 0
+    try:
+        datas = proweb_product.objects.filter(**conds).order_by("-serial_num")[:1]
+        for data in datas:
+            serial_num = data.serial_num
+    except:
+        pass
+
+    #print(serial_num)
+    return serial_num
+
 ######################################## 頁面 start ########################################
 #商品列表
 def product_list(request):
@@ -108,9 +121,23 @@ def product_list(request):
         code_datas = getCode({},"cname")
         #print(code_datas)
 
+        #是否顯示
+        is_display_datas = {}
+        is_display_datas[""] = "全部"
+        is_display_datas[1] = "是"
+        is_display_datas[0] = "否"
+
+        #排序
+        orderby_datas = {}
+        orderby_datas["serial"] = "編號 遞增"
+        orderby_datas["-serial"] = "編號 遞減"
+        orderby_datas["price"] = "價錢 遞增"
+        orderby_datas["-price"] = "價錢 遞減"
+
         #取得目前頁數
         cur_page = 1
-        search_get_url = keywords = types = select_types = ""
+        search_get_url = keywords = types = is_display = ""
+        orderby = "serial"
         if request.method == "GET":
             if "cur_page" in request.GET and request.GET["cur_page"] != "":
                 cur_page = request.GET["cur_page"]
@@ -118,9 +145,14 @@ def product_list(request):
                 keywords = request.GET["keywords"].strip()
                 search_get_url += ";keywords="+keywords
             if "types" in request.GET and request.GET["types"] != "": #類別
-                types = request.GET["types"]
-                search_get_url += ";types="+types
-                select_types = int(types) #搜尋條件-選單選取需轉換型態判斷
+                types = int(request.GET["types"])
+                search_get_url += ";types="+str(types)
+            if "is_display" in request.GET and request.GET["is_display"] != "": #是否顯示
+                is_display = int(request.GET["is_display"])
+                search_get_url += ";is_display="+str(is_display)
+            if "orderby" in request.GET and request.GET["orderby"] != "": #排序
+                orderby = request.GET["orderby"]
+                search_get_url += ";orderby="+orderby
         
         try:
             auth_user = User.objects.get(username=username,password=password)
@@ -134,6 +166,8 @@ def product_list(request):
                     conds_and.children.append(("is_delete",0))
                     if types != "": #類別
                         conds_and.children.append(("types",types))
+                    if is_display != "": #是否顯示
+                        conds_and.children.append(("is_display",is_display))
                     if keywords != "": #關鍵字
                         conds_or = Q()
                         conds_or.connector = "OR"
@@ -143,7 +177,7 @@ def product_list(request):
                     conds.add(conds_and,"AND")
                     #print(conds)
                     #取得資料
-                    all_datas = proweb_product.objects.filter(conds).order_by("serial").values()
+                    all_datas = proweb_product.objects.filter(conds).order_by(orderby).values()
                     #取得分頁
                     page_data = getPage(request,cur_page,all_datas)
                     if "list_data" in page_data:
@@ -188,10 +222,11 @@ def product_data(request,action_type="add"):
                     title_txt = "新增商品"
                     #隱藏按鈕-刪除商品
                     btn_none = "none"
-                    
+                    #是否顯示
+                    is_display_checked = "checked"
                 elif action_type == "edit": #編輯
                     title_txt = "編輯商品"
-                    uuid = ""
+                    uuid = is_display_checked = ""
                     #取得UUID
                     if request.method == "GET":
                         if "uuid" in request.GET and request.GET["uuid"] != "":
@@ -200,6 +235,9 @@ def product_data(request,action_type="add"):
                     #依UUID取得資料
                     if uuid != "":
                         data = proweb_product.objects.get(uuid=uuid)
+                        if data.is_display == 1:
+                            is_display_checked = "checked"
+                        
         except:
             pass
     return render(request,"product_data.html",locals())
@@ -237,7 +275,51 @@ def ajax_product_data(request):
         
         if post_user_id > 0:
             if action_type == "add": #新增
-                pass    
+                #取得代碼名稱
+                code_datas = getCode({},"code")
+                #print(code_datas)
+
+                #取得資料表
+                data = proweb_product()
+                
+                #類型
+                types = int(request.POST["types"]) if "types" in request.POST and request.POST["types"] != "" else 1
+                data.types = types
+
+                #取得最後一筆編號
+                conds = {}
+                conds["types"] = types
+                serial_num = int(getSerial(conds))
+                serial_num = serial_num+1
+                data.serial_num = serial_num
+                #print(data.serial_num)
+                #編號
+                data.serial = str(code_datas[types])+str(serial_num).zfill(4)
+                #print(data.serial)
+
+                #商品資料
+                data.uuid = uuid.uuid4()
+                data.user_id = post_user_id
+                data.name = request.POST["name"] if "name" in request.POST and request.POST["name"] != "" else ""
+                data.author = request.POST["author"] if "author" in request.POST and request.POST["author"] != "" else ""
+                data.office = request.POST["office"] if "office" in request.POST and request.POST["office"] != "" else ""
+                data.publish = request.POST["publish"] if "publish" in request.POST and request.POST["publish"] != "" else datetime.datetime.now().strftime("%Y-%m-%d")
+                data.price = request.POST["price"] if "price" in request.POST and request.POST["price"] != "" else 0
+                data.sales = request.POST["sales"] if "sales" in request.POST and request.POST["sales"] != "" else data.price
+                data.content = request.POST["content"] if "content" in request.POST and request.POST["content"] != "" else ""
+                data.category = request.POST["category"] if "category" in request.POST and request.POST["category"] != "" else ""
+                data.is_delete = 0
+                data.create_time = now
+                data.modify_time = now
+                #是否顯示
+                if request.POST.get("is_display","false") == "on":
+                    data.is_display = 1
+                else:
+                    data.is_display = 0
+                #儲存
+                data.save()
+                error = False   
+                message = data.uuid #回傳uuid
             elif action_type == "edit": #編輯
                 uuid = request.POST["uuid"] if "uuid" in request.POST else ""
                 #取得商品資料
@@ -253,27 +335,26 @@ def ajax_product_data(request):
                     data.content = request.POST["content"] if "content" in request.POST and request.POST["content"] != "" else ""
                     data.category = request.POST["category"] if "category" in request.POST and request.POST["category"] != "" else ""
                     data.modify_time = now
-                    print(request.POST["content"])
-                    #print(data.content)
+                    #是否顯示
+                    if request.POST.get("is_display","false") == "on":
+                        data.is_display = 1
+                    else:
+                        data.is_display = 0
                     #儲存
                     data.save()
                     error = False
                 else:
                     message = "沒有編輯權限！"
             elif action_type == "delete": #刪除
-                """
-                if "uuid" in request.POST and request.POST["uuid"] != "":
-                    #try:
-                    data = proweb_product.object.get(uuid=request.POST["uuid"])
-                    print(data)
+                uuid = request.POST["uuid"] if "uuid" in request.POST else ""
+                #取得商品資料
+                data = proweb_product.objects.get(uuid=uuid)
+                if post_user_id == data.user_id:
                     data.is_delete = 1
                     data.save()
                     error = False
-                    #except:
-                        #message = "刪除錯誤！"
                 else:
-                    message = "無法刪除資料！"
-                """
+                    message = "沒有刪除權限！"
             elif action_type == "delete_list": #刪除-列表勾選多筆
                 if "check_list" in request.POST and request.POST["check_list"] != "":
                     check_list = request.POST["check_list"].split(",")
