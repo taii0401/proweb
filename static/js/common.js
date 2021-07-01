@@ -95,6 +95,16 @@ function removeArray(arr) {
 	return arr;
 }
 
+//開啟關閉按鈕-顯示文字
+function changeSwitch(id) {
+    var check_switch = $('#'+id).prop('checked');
+	if(check_switch) {
+		$('#input_switch_text_'+id).html('開啟');
+	} else {
+		$('#input_switch_text_'+id).html('關閉');
+	}
+}
+
 //檢查必填欄位(class對應的欄位,是否顯示錯誤訊息區)
 function checkRequiredClass(classStr,isShowMsg) {
 	var class_arr = classStr.split(',');
@@ -365,7 +375,9 @@ function productSubmit(action_type) {
             //console.log(response);
             if(response.error == false) {
                 if(action_type == 'add') { //新增
+                    uuid = response.message;
                     alert("新增成功！");
+                    changeForm('/product/product_data/edit?uuid='+uuid);
                 } else if(action_type == 'edit') { //編輯
                     uuid = $('#uuid').val();
                     alert("編輯成功！");
