@@ -19,6 +19,7 @@
                         <input type="hidden" id="action_type" name="action_type" value="{{ action_type }}">
                         <input type="hidden" id="user_id" name="user_id" value="{{ auth_user.id }}">
                         <input type="hidden" id="uuid" name="uuid" value="{{ data.uuid }}">
+                        <input type="hidden" id="types" name="types" value="1">
                         <div class="row">
                             <div class="col-3">
                                 產品編號：{{ data.serial }}
@@ -36,6 +37,10 @@
                             </div>-->
                             <div class="col-3">
                                 <label>是否顯示：</label>
+                                <label class="form-switch">
+                                    <input type="checkbox" id="is_display" name="is_display" class="form-control" onclick="changeSwitch('is_display');" {{ is_display_checked }}>
+                                    <i></i> <span id="input_switch_text_is_display"></span>
+                                </label>
                             </div>
                             <div class="col-6">
                                 <label>名稱：</label>
@@ -105,12 +110,18 @@
 <script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
 <script>
     $(function () {
+        //日期
         $('.datetimepicker').datepicker({
             language: 'zh-TW', //中文化
             format: 'yyyy-mm-dd', //格式
             autoclose: true, //選擇日期後就會自動關閉
             todayHighlight: true //今天會有一個底色
         });
+
+        //是否顯示
+        changeSwitch('is_display');
+
+        //編輯器
         CKEDITOR.replace('content');
         CKEDITOR.replace('category');
     });
