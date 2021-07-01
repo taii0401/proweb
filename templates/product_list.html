@@ -38,13 +38,35 @@
                 </div>
                 <div class="col-md-4">
                     <input type="hidden" id="types" name="types" class="form-control search_input_data" value="{{ types }}">
-                    <div class="dropdown">
+                    <input type="hidden" id="is_display" name="is_display" class="form-control search_input_data" value="{{ is_display }}">
+                    <input type="hidden" id="orderby" name="orderby" class="form-control search_input_data" value="{{ orderby }}">
+                    <div class="dropdown btn-group">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             類別
                         </button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            {% for code_id,code_cname in code_options.items %}
-                            <a class="dropdown-item {% ifequal code_id select_types %} active {% endifequal %}" href="#" onclick="$('#types').val('{{ code_id }}');getSearchUrl('/product/product_list/');">{{ code_cname }}</a>
+                            {% for id,name in code_options.items %}
+                            <a class="dropdown-item {% ifequal id types %} active {% endifequal %}" href="#" onclick="$('#types').val('{{ id }}');getSearchUrl('/product/product_list/');">{{ name }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="dropdown btn-group">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            顯示
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            {% for id,name in is_display_datas.items %}
+                            <a class="dropdown-item {% ifequal id is_display %} active {% endifequal %}" href="#" onclick="$('#is_display').val('{{ id }}');getSearchUrl('/product/product_list/');">{{ name }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="dropdown btn-group">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            排序
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            {% for id,name in orderby_datas.items %}
+                            <a class="dropdown-item {% ifequal id orderby %} active {% endifequal %}" href="#" onclick="$('#orderby').val('{{ id }}');getSearchUrl('/product/product_list/');">{{ name }}</a>
                             {% endfor %}
                         </div>
                     </div>
