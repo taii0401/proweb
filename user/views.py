@@ -42,10 +42,106 @@ def getRandom(num):
         ran_str += str(current_code)
     return ran_str
 
+#取得檔案
+def getFile(conds={},return_col=""):
+    data = {}
+    #依搜尋條件取得檔案
+    file_datas = proweb_file.objects.filter(**conds).values()
+    for file_data in file_datas:
+        #file_id
+        file_id = 0
+        if "id" in file_data and file_data["id"] > 0:
+            file_id = file_data["id"]
+
+            #回傳資料
+            if return_col != "":
+                if return_col in file_data:
+                    data[file_id] = file_data[return_col]
+            else:
+                data[file_id] = file_data
+    #print(data)
+    return data
+    
+#取得檔案資料
+def getFileData(conds={},is_detail=False):
+    data = {}
+    #依搜尋條件取得檔案資料
+    file_datas = proweb_file_data.objects.filter(**conds).values()
+    for file_data in file_datas:
+        #file_id
+        file_id = 0
+        if "file_id" in file_data and file_data["file_id"] > 0:
+            file_id = file_data["file_id"]
+            data[file_id] = file_data
+
+            if is_detail: #取得檔案詳細資料
+                conds_file = {}
+                conds_file["id"] = file_id
+                file_details = getFile(conds_file)
+                for key,val in file_details[file_id].items():
+                    if key == "id":
+                        data[file_id]["file_id"] = val
+                    else:
+                        data[file_id][key] = val
+    #print(data)
+    return data
+
 #更新檔案資料
-def update_file_data(data):
-    file_data = {}
-    print("vvv")
+def updateFileData(data):
+    error = True
+    message = "請確認資料！"
+    #建立時間
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    conds = {}
+    if "data_id" in data and data["data_id"] != "":
+        conds["data_id"] = data["data_id"]
+    else:
+        message = "請確認類別ID！"
+    if "data_type" in data and data["data_type"] != "":
+        conds["data_type"] = data["data_type"]
+    else:
+        message = "請確認類別！"
+    #取得資料內所有file_id
+    exist_file_ids = []
+    delete_ids = []
+    all_datas = proweb_file_data.objects.filter(**conds).values()
+    for all_data in all_datas:
+        if all_data["file_id"] not in data["file_ids"]:
+            delete_ids.append(all_data["id"]) #取得需要刪除的ID
+        else:
+            exist_file_ids.append(all_data["file_id"]) #取得需要存在的file_id
+
+    #print(exist_file_ids)
+    #print(delete_ids)
+
+    #刪除資料
+    for delete_id in delete_ids:
+        delete_data = proweb_file_data.objects.get(id=delete_id)
+        #刪除實際檔案(未)
+
+        delete_data.delete()
+    
+    #新增資料
+    if "file_ids" in data:
+        for file_id in data["file_ids"]:
+            if file_id not in exist_file_ids: #判斷file_id是否存在
+                insert_data = proweb_file_data()
+                insert_data.data_id = data["data_id"]
+                insert_data.data_type = data["data_type"]
+                insert_data.file_id = file_id
+                insert_data.create_by = data["post_user_id"]
+                insert_data.create_time = now
+                insert_data.modify_by = data["post_user_id"]
+                insert_data.modify_time = now
+                insert_data.save()
+        error = False
+    else:
+        message = "請確認檔案資料！"
+
+    return_data = {"error":error,"message":message}
+    #print(return_data)
+    return return_data
 
 ######################################## 頁面 start ########################################
 #首頁
@@ -248,7 +344,7 @@ def ajax_upload(request):
     return_data = {"error":error,"message":message,"file_name":name,"file_id":file_id}
     #print(return_data)
     return JsonResponse(return_data)
-    
+
 #AJAX-檢查使用者帳號是否已存在
 def ajax_user_exist(request):
     error = True
