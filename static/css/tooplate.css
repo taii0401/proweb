@@ -433,7 +433,7 @@ footer {
   float:left;
 }
 
-/*開啟關閉按鈕*/
+/*開啟關閉按鈕 START*/
 .form-switch {
   display: inline-block;
   cursor: pointer;
@@ -491,7 +491,46 @@ footer {
 .form-switch input:checked + i::before { transform: translate3d(18px, 2px, 0) scale3d(0, 0, 0); }
 
 .form-switch input:checked + i::after { transform: translate3d(22px, 2px, 0); }
-/*開啟關閉按鈕*/
+/*開啟關閉按鈕 END*/
+
+/*上傳 START*/
+.dm-uploader {
+	border: 0.25rem dashed #A5A5C7;
+	text-align: center;
+}
+
+.dm-uploader.active {
+	border-color: red;
+
+	border-style: solid;
+}
+
+.dm-uploader {
+  cursor:default;
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  -khtml-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none
+}
+
+.dm-uploader .btn {
+  position:relative;
+  overflow:hidden
+}
+
+.dm-uploader .btn input[type=file] {
+  position:absolute;
+  top:0;
+  right:0;
+  margin:0;
+  border:solid transparent;
+  width:100%;
+  opacity:0;
+  cursor:pointer
+}
+/*上傳 END*/
 
 
 @media (min-width: 992px) {
