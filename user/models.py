@@ -26,6 +26,7 @@ class proweb_user(models.Model):
 #上傳檔案資料表
 class proweb_file(models.Model):
     name = models.CharField(max_length=255,default="",null=True)
+    file_name = models.CharField(max_length=255,default="",unique=True)
     path = models.CharField(max_length=255,default="",null=True)
     size = models.CharField(max_length=30,default="",null=True)
     types = models.CharField(max_length=30,default="",null=True)
@@ -50,4 +51,4 @@ class proweb_file_data(models.Model):
         return self.data_id
     
     class Meta:
-        db_table = "proweb_product_file" #定義資料表名稱
+        db_table = "proweb_file_data" #定義資料表名稱
