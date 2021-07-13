@@ -80,12 +80,12 @@
                                 <textarea id="category" name="category" class="form-control">{{ data.category|safe }}</textarea>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row" style="margin-top:25px;margin-bottom:25px">
                             <div class="col-12">
-                                <label><br/>上傳圖片：</label>
+                                <label>上傳圖片：</label>
                             </div>
+                            {% include "upload.html" %}
                         </div>
-                        
                         <div class="row">
                             <div class="col-12 col-sm-6">
                                 <button type="button" class="btn btn-primary" onclick="productSubmit('{{ action_type }}');">送出</button>
@@ -108,6 +108,12 @@
 <!-- 編輯器 -->
 <script src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
 <script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+
+<!-- 上傳檔案 -->
+<script src="{% static 'upload/jquery.dm-uploader.min.js' %}"></script>
+<script src="{% static 'upload/jquery.dm-uploader-ui.js' %}"></script>
+
+
 <script>
     $(function () {
         //日期
@@ -124,6 +130,9 @@
         //編輯器
         CKEDITOR.replace('content');
         CKEDITOR.replace('category');
+
+        //上傳檔案
+        upload_file();
     });
 </script>
 {% endblock %}
