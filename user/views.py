@@ -5,8 +5,8 @@ from django.http import JsonResponse
 #使用者權限
 from django.contrib.auth.models import User
 from django.contrib import auth
-#使用者資料
-from user.models import proweb_user
+#使用者資料、檔案資料
+from user.models import proweb_user,proweb_file,proweb_file_data
 
 import datetime
 
@@ -40,8 +40,12 @@ def getRandom(num):
             #生成一個隨機的字母，這裡一定要主義chr（）轉換一下
             current_code = chr(random.randint(65,90))
         ran_str += str(current_code)
-    
     return ran_str
+
+#更新檔案資料
+def update_file_data(data):
+    file_data = {}
+    print("vvv")
 
 ######################################## 頁面 start ########################################
 #首頁
@@ -168,6 +172,83 @@ def user_forget(request):
 
 
 ######################################## ajax start ########################################
+#AJAX-上傳檔案
+def ajax_upload(request):
+    import os,uuid
+    error = True
+    message = "請確認資料！"
+
+    #登入帳號
+    if "username" in request.session and request.session["username"] != "":
+        post_username = request.session["username"]
+
+    #取得使用者ID
+    post_user_id = 0
+    try:
+        auth_user = User.objects.get(username=post_username)
+        if auth_user is not None and auth_user.is_active:
+            post_user_id = auth_user.id
+    except:
+        message = "無法取得使用者！"
+    #print(post_user_id)
+
+    file_id = 0 #檔案ID
+    file_name = "" #檔案名稱
+    if post_user_id > 0:
+        try:
+            #取得檔案
+            file = request.FILES["file"]
+            #檔案大小
+            size = file.size
+            #原檔案名稱
+            name = file.name
+            #print(name)
+            #檔案型態
+            types = name.split(".")[-1]
+            #新檔案名稱
+            new_name = uuid.uuid4().hex[:10]+"_"+datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            file_name = "{}.{}".format(new_name,types)
+            #print(file_name)
+
+            #檔案儲存路徑
+            user_file_path = "files/"+str(post_user_id)
+            #file_path = os.path.join(user_file_path,file_name)
+            #print(file_path)
+            absolute_file_path = os.path.join("media",user_file_path,file_name)
+            #取得資料夾名稱
+            directory = os.path.dirname(absolute_file_path)
+            if not os.path.exists(directory): #檢查資料夾是否存在
+                #建立資料夾
+                os.makedirs(directory)
+            #存入檔案
+            with open(absolute_file_path,"wb+") as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
+
+            #新增檔案資料
+            try:
+                #取得資料表
+                data = proweb_file()
+                #檔案資料
+                data.name = name
+                data.file_name = file_name
+                data.path = user_file_path
+                data.size = size
+                data.types = types
+                #儲存
+                data.save()
+                file_id = data.id
+                error = False
+            except:
+                message = "新增檔案錯誤！"
+        except:
+            message = "上傳檔案錯誤！"
+    
+
+    return_data = {"error":error,"message":message,"file_name":name,"file_id":file_id}
+    #print(return_data)
+    return JsonResponse(return_data)
+    
 #AJAX-檢查使用者帳號是否已存在
 def ajax_user_exist(request):
     error = True

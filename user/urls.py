@@ -8,6 +8,7 @@ urlpatterns = [
     path('user_data/<str:action_type>/', views.user_data),      #新增、編輯使用者
     
 
+    path('ajax_upload/', views.ajax_upload),                    #上傳檔案
     path('ajax_user_data/', views.ajax_user_data),              #檢查新增、編輯、刪除使用者
     path('ajax_user_exist/', views.ajax_user_exist),            #檢查使用者帳號是否已存在
     path('ajax_user_forget/', views.ajax_user_forget),          #檢查忘記密碼資料
