@@ -9,6 +9,8 @@ from django.contrib.auth.models import User
 from django.contrib import auth
 #商品資料
 from product.models import proweb_code,proweb_product
+#檔案資料
+from user.views import getFileData,updateFileData
 
 import datetime
 
@@ -238,6 +240,11 @@ def product_data(request,action_type="add"):
                         if data.is_display == 1:
                             is_display_checked = "checked"
                         
+                        conds = {}
+                        conds["data_id"] = data.id
+                        conds["data_type"] = "product"
+                        file_datas = getFileData(conds,True)
+                        
         except:
             pass
     return render(request,"product_data.html",locals())
@@ -251,6 +258,21 @@ def product_data(request,action_type="add"):
 def ajax_product_data(request):
     error = True
     message = "請確認資料！"
+
+    #登入帳號
+    if "username" in request.session and request.session["username"] != "":
+        post_username = request.session["username"]
+
+    #取得使用者ID
+    post_user_id = 0
+    try:
+        auth_user = User.objects.get(username=post_username)
+        if auth_user is not None and auth_user.is_active:
+            post_user_id = auth_user.id
+    except:
+        message = "無法取得使用者！"
+    #print(post_user_id)
+
     if request.method == "POST":
         import uuid
         #建立時間
@@ -258,20 +280,6 @@ def ajax_product_data(request):
         #動作類型(新增、編輯)
         action_type = request.POST["action_type"] if "action_type" in request.POST else ""
         #print(action_type)
-
-        #登入帳號
-        if "username" in request.session and request.session["username"] != "":
-            post_username = request.session["username"]
-
-        #取得使用者ID
-        post_user_id = 0
-        try:
-            auth_user = User.objects.get(username=post_username)
-            if auth_user is not None and auth_user.is_active:
-                post_user_id = auth_user.id
-        except:
-            message = "無法取得使用者！"
-        #print(post_user_id)
         
         if post_user_id > 0:
             if action_type == "add": #新增
@@ -318,8 +326,21 @@ def ajax_product_data(request):
                     data.is_display = 0
                 #儲存
                 data.save()
-                error = False   
-                message = data.uuid #回傳uuid
+                data_id = data.id
+
+                #檔案
+                file_data = {}
+                file_data["data_id"] = data_id
+                file_data["data_type"] = "product"
+                file_data["file_ids"] = request.POST.getlist("file_id[]")
+                file_data["post_user_id"] = post_user_id
+                result = updateFileData(file_data)
+                if result["error"] == False:
+                    error = False   
+                    message = data.uuid #回傳uuid
+                else:
+                    message = result["message"]
+                    
             elif action_type == "edit": #編輯
                 uuid = request.POST["uuid"] if "uuid" in request.POST else ""
                 #取得商品資料
@@ -327,6 +348,7 @@ def ajax_product_data(request):
                 if post_user_id == data.user_id:
                     #商品資料
                     data.name = request.POST["name"] if "name" in request.POST and request.POST["name"] != "" else ""
+                    data.types = request.POST["types"] if "types" in request.POST and request.POST["types"] != "" else ""
                     data.author = request.POST["author"] if "author" in request.POST and request.POST["author"] != "" else ""
                     data.office = request.POST["office"] if "office" in request.POST and request.POST["office"] != "" else ""
                     data.publish = request.POST["publish"] if "publish" in request.POST and request.POST["publish"] != "" else datetime.datetime.now().strftime("%Y-%m-%d")
@@ -342,7 +364,19 @@ def ajax_product_data(request):
                         data.is_display = 0
                     #儲存
                     data.save()
-                    error = False
+                    data_id = data.id
+
+                    #檔案
+                    file_data = {}
+                    file_data["data_id"] = data_id
+                    file_data["data_type"] = "product"
+                    file_data["file_ids"] = request.POST.getlist("file_id[]")
+                    file_data["post_user_id"] = post_user_id
+                    result = updateFileData(file_data)
+                    if result["error"] == False:
+                        error = False
+                    else:
+                        message = result["message"]
                 else:
                     message = "沒有編輯權限！"
             elif action_type == "delete": #刪除
@@ -372,3 +406,4 @@ def ajax_product_data(request):
     return JsonResponse(return_data)
 
 ######################################## ajax end ########################################
+
