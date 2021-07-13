@@ -95,6 +95,67 @@ function removeArray(arr) {
 	return arr;
 }
 
+//上傳檔案
+function upload_file() {
+    $('#drag-and-drop-zone').dmUploader({ 
+        url: '/user/ajax_upload/',
+        maxFileSize: 3000000, //檔案限制大小-3Megs
+        extFilter: ['jpg','jpeg','png'], //允許的檔案字尾名
+        onDragEnter: function() {
+            this.addClass('active');
+        },
+        onDragLeave: function() {
+            this.removeClass('active');
+        },
+        onUploadCanceled: function(id) { //取消
+            ui_multi_update_file_status(id, 'warning', '取消');
+            ui_multi_update_file_progress(id, 0, 'warning', false);
+        },
+        onUploadSuccess: function(id, file, data) { //完成
+            jsdata = JSON.stringify(data);
+            jsdata = JSON.parse(jsdata);
+
+            if(!jsdata.error) {
+                id = jsdata.file_id;
+
+                var template = $('#files-template').text();                
+                template = template.replaceAll('%%file_name%%', file.name);
+                template = template.replaceAll('%%file_id%%', id);
+
+                template = $(template);
+                template.prop('id', 'uploaderFile' + id);
+                template.data('file-id', id);
+
+                $('#files').prepend(template);
+
+                ui_multi_update_file_status(id, 'success', '完成');
+                ui_multi_update_file_progress(id, 100, 'success', false);
+            } else {
+                alert(jsdata.message);
+                return false;
+            }
+            
+        },
+        onUploadError: function(id, xhr, status, message) { //錯誤訊息
+            ui_multi_update_file_status(id, 'danger', message);
+            ui_multi_update_file_progress(id, 0, 'danger', false);  
+        },
+        onFileSizeError: function(file) { //檢查檔案大小
+            alert('\''+file.name+'\' 無法上傳: 檔案超過限制大小');
+            return false;
+        },
+        onFileExtError: function (file) { //檢查檔案格式
+            alert('僅支援上傳圖檔');
+            return false;
+        }
+    });
+}
+
+//刪除檔案
+function delete_file(id) {
+    $('#uploaderFile'+id).remove();
+}
+
 //開啟關閉按鈕-顯示文字
 function changeSwitch(id) {
     var check_switch = $('#'+id).prop('checked');
