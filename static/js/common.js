@@ -151,9 +151,43 @@ function upload_file() {
     });
 }
 
-//刪除檔案
-function delete_file(id) {
+//刪除上傳檔案
+function delete_file(id,type) {
+    var yes = confirm("你確定要刪除嗎？");
+    if(!yes) {
+        return false;
+    }
+
+    //取得csrf_token
+    var csrf_token = getCookie('csrftoken');
+    //刪除上傳顯示檔案block
     $('#uploaderFile'+id).remove();
+    if(type == 'add') { //新增時，尚未存至資料表(proweb_file_data)，因此直接刪除
+        //刪除實際路徑
+        $.ajax({
+            type: 'POST',
+            url: '/user/ajax_upload_delete/',
+            dataType: 'json',
+            data: {csrfmiddlewaretoken : csrf_token,file_id : id},
+            error: function(xhr) {
+                //console.log(xhr);
+                alert('傳送錯誤！');
+                return false;
+            },
+            success: function(response) {
+                //console.log(response);
+                if(response.error == false) {
+                    
+                } else if(response.error == true) {
+                    alert(response.message);
+                    return false;
+                } else {
+                    alert('傳送錯誤！');
+                    return false;
+                }
+            }
+        });
+    }
 }
 
 //開啟關閉按鈕-顯示文字
@@ -256,6 +290,7 @@ function showMsg(div_msg,message,isShowMsg) {
 function userExist(username) {
     //取得csrf_token
     var csrf_token = getCookie('csrftoken');
+    isSuccess = false;
     $.ajax({
         type: 'POST',
         url: '/user/ajax_user_exist/',
@@ -264,29 +299,65 @@ function userExist(username) {
         error: function(xhr) {
             //console.log(xhr);
             alert('傳送錯誤！');
-            return false;
+            isSuccess = false;
         },
         success: function(response) {
             //console.log(response);
             if(response.error == false) {
                 showMsg('msg_success',response.message,true);
-                return true;
+                isSuccess = true;
             } else if(response.error == true) {
                 showMsg('msg_error',response.message,true);
-                return false;
+                isSuccess = false;
             } else {
                 alert('傳送錯誤！');
-                return false;
+                isSuccess = false;
             }
         }
     });
+
+    return isSuccess;
+}
+
+//檢查商品頁面網址是否存在
+function userLinkExist(short_link) {
+    //取得csrf_token
+    var csrf_token = getCookie('csrftoken');
+    isSuccess = false;
+    $.ajax({
+        type: 'POST',
+        url: '/user/ajax_user_link_exist/',
+        dataType: 'json',
+        data: {csrfmiddlewaretoken : csrf_token,short_link : short_link},
+        error: function(xhr) {
+            //console.log(xhr);
+            alert('傳送錯誤！');
+            isSuccess = false;
+        },
+        success: function(response) {
+            //console.log(response);
+            if(response.error == false) {
+                showMsg('msg_success',response.message,true);
+                isSuccess = true;
+            } else if(response.error == true) {
+                showMsg('msg_error',response.message,true);
+                isSuccess = false;
+            } else {
+                alert('傳送錯誤！');
+                isSuccess = false;
+            }
+        }
+    });
+
+    return isSuccess;
 }
 
 //忘記密碼
 function userForget() {
+    isSuccess = false;
     //檢查必填
     if(checkRequiredClass('require',true) == false) {
-		return false;
+		isSuccess = false;
 	}
 
     $.ajax({
@@ -297,24 +368,26 @@ function userForget() {
         error: function(xhr) {
             //console.log(xhr);
             alert('傳送錯誤！');
-            return false;
+            isSuccess = false;
         },
         success: function(response) {
             //console.log(response);
             if(response.error == false) {
                 $('#msg_error').css('display','none');
                 showMsg('msg_success',response.message,true);
-                return false;
+                isSuccess = false;
             } else if(response.error == true) {
                 $('#msg_success').css('display','none');
                 showMsg('msg_error',response.message,true);
-                return false;
+                isSuccess = false;
             } else {
                 alert('傳送錯誤！');
-                return false;
+                isSuccess = false;
             }
         }
     });
+
+    return isSuccess;
 }
 
 //送出-使用者資料
@@ -341,10 +414,15 @@ function userSubmit(action_type) {
         if(checkFormat('confirm_password',$('#confirm_password').val(),0,true) == false) {
             return false;
         }
-	} else if(action_type == 'edit') { //編輯
+	}
+    if(action_type == 'add' || action_type == 'edit') { //新增、編輯
 	    //檢查商品頁面網址
         if($('#short_link').val() != '') {
             if(checkFormat('en_number',$('#short_link').val(),100,true) == false) {
+                return false;
+            }
+            //檢查商品頁面網址是否存在
+            if(userLinkExist($('#short_link').val()) == false) {
                 return false;
             }
         }
@@ -354,7 +432,8 @@ function userSubmit(action_type) {
                 return false;
             }
         }
-    } else if(action_type == 'delete') { //刪除
+    }
+    if(action_type == 'delete') { //刪除
         var yes = confirm("你確定要刪除嗎？");
         if(!yes) {
             return false;
