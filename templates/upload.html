@@ -11,7 +11,20 @@
 <div class="col-md-6 col-sm-12">
     <div class="card h-100">
         <div class="card-header">檔案</div>
-        <ul class="list-unstyled p-2 d-flex flex-column col" id="files"></ul>
+        <ul class="list-unstyled p-2 d-flex flex-column col" id="files">
+            {% for key,val in file_datas.items %}
+            <li class="media" id="uploaderFile{{ val.file_id }}">
+                <div class="media-body mb-1">
+                    <p class="mb-2">
+                        <strong>{{ val.name }}</strong>
+                        <input type="hidden" id="file_id_{{ val.file_id }}" name="file_id[]" value="{{ val.file_id }}" />
+                        <i class="fas fa-trash-alt tm-trash-icon" onclick="delete_file('{{ val.file_id }}','edit');"></i>
+                    </p>
+                    <hr class="mt-1 mb-1" />
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
 </div><!-- /file list -->
 <div class="col-12" style="display:none;">
@@ -33,7 +46,7 @@
             <p class="mb-2">
                 <strong>%%file_name%%</strong> - 狀態: <span class="text-muted">等待</span>
                 <input type="hidden" id="file_id_%%file_id%%" name="file_id[]" value="%%file_id%%" />
-                <i class="fas fa-trash-alt tm-trash-icon" onclick="delete_file('%%file_id%%');"></i>
+                <i class="fas fa-trash-alt tm-trash-icon" onclick="delete_file('%%file_id%%','add');"></i>
             </p>
             <div class="progress mb-2" style="display:none;">
                 <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
