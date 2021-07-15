@@ -1,23 +1,5 @@
 {% extends "base.html" %}
 {% block title %} 商品列表 {% endblock %}
-{% block css %} 
-<style>
-    #div_img { 
-        width:80px; 
-        height:80px; 
-        margin:5px auto; 
-        position:relative; 
-        text-align: center; 
-        padding-left:50px;
-    } 
-    #div_img img { 
-        position:absolute; 
-        left:0; 
-        top:0; 
-        margin: 0 auto;
-    } 
-</style>
-{% endblock %}
 {% block content %}
 <form id="form_data" class="tm-signup-form" method="post">
     {% csrf_token %}
@@ -74,6 +56,7 @@
                 <div class="col-md-4 col-sm-12 text-right">
                     <button type="button" class="btn btn-primary" onclick="changeForm('/product/product_data/add');">新增</button>
                     <button type="button" class="btn btn-danger check_btn" style="display:none" onclick="productSubmit('delete_list');">刪除</button>
+                    <button type="button" class="btn btn-primary" onclick="changeForm('/user/my_page/{{ user_data.short_link }}');">我的頁面</button>
                 </div>
             </div>
             <div class="tm-table-mt tm-table-actions-row">
@@ -114,16 +97,12 @@
                                 </div>
                             </td>
                             <td class="text-center">{{ data.serial }}</td>
-                            <td class="text-center">
-                                <div id="div_img"> 
-                                    <img src="http://photosku.com/images_file/small_images/s000_496.jpg" width="80px" height="80px"> 
-                                </div> 
-                            </td>
+                            <td class="text-center"><img src="{{ data.file_path }}" width="auto" height="80px"></td>
                             <td class="tm-product-name">{{ data.name }}</td>
-                            <td class="text-center">{{ types_name }}</td>
+                            <td class="text-center">{{ data.types_name }}</td>
                             <td class="text-center">{{ data.price }}</td>
                             <td class="text-center">{{ data.sales }}</td>
-                            <td class="text-center">{{ is_display_name }}</td>
+                            <td class="text-center">{{ data.is_display_name }}</td>
                             <td class="text-center">
                                 <div class="col">
                                     <div class="btn-action">
@@ -154,29 +133,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block script %} 
-<script type="text/javascript"> 
-    $(function(){ 
-        $('#div_img img').mouseenter(function(){ 
-            var wValue=1.5 * $(this).width(); 
-            var hValue=1.5 * $(this).height(); 
-            $(this).animate({
-                width: wValue, 
-                height: hValue, 
-                left:("-"+(0.5 * $(this).width())/2), 
-                top:("-"+(0.5 * $(this).height())/2)}, 
-            1000); 
-        }).mouseleave(function(){ 
-            $(this).animate({
-                width: "100", 
-                height: "80", 
-                left:"0px", 
-                top:"0px"
-            }, 1000 ); 
-        }); 
-    }); 
-</script>
-
 {% endblock %}
