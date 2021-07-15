@@ -17,13 +17,14 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
-from user import views
+from product import views
+
 
 urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
 
     #path('admin', admin.site.urls),
-    path('',views.index), #首頁
+    path('',views.product_list), #首頁
     path('user/', include('user.urls')),
     path('product/', include('product.urls')),
 ] 
