@@ -6,11 +6,13 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.contrib import auth
 #使用者資料、檔案資料
-from user.models import proweb_user,proweb_file,proweb_file_data
+from user.models import proweb_code,proweb_file,proweb_file_data,proweb_user
+#商品資料
+from product.models import proweb_product
 
 import datetime
 
-# Create your views here.
+######################################## 共用函式 start ########################################
 #測試連線
 def dblink(request,db_name):
     import pymysql
@@ -63,10 +65,10 @@ def getFile(conds={},return_col=""):
     return data
     
 #取得檔案資料
-def getFileData(conds={},is_detail=False):
+def getFileData(conds={},is_detail=False,orderby="file_id"):
     data = {}
     #依搜尋條件取得檔案資料
-    file_datas = proweb_file_data.objects.filter(**conds).values()
+    file_datas = proweb_file_data.objects.filter(**conds).order_by(orderby).values()
     for file_data in file_datas:
         #file_id
         file_id = 0
@@ -79,15 +81,14 @@ def getFileData(conds={},is_detail=False):
                 conds_file["id"] = file_id
                 file_details = getFile(conds_file)
                 for key,val in file_details[file_id].items():
-                    if key == "id":
-                        data[file_id]["file_id"] = val
-                    else:
-                        data[file_id][key] = val
+                    if key != "id":
+                        data[file_id][key] = val                        
     #print(data)
     return data
 
 #更新檔案資料
 def updateFileData(data):
+    import os
     error = True
     message = "請確認資料！"
     #建立時間
@@ -101,31 +102,43 @@ def updateFileData(data):
     if "data_type" in data and data["data_type"] != "":
         conds["data_type"] = data["data_type"]
     else:
-        message = "請確認類別！"
+        message = "請確認型態！"
+    
     #取得資料內所有file_id
     exist_file_ids = []
-    delete_ids = []
+    delete_file_ids = []
     all_datas = proweb_file_data.objects.filter(**conds).values()
     for all_data in all_datas:
-        if all_data["file_id"] not in data["file_ids"]:
-            delete_ids.append(all_data["id"]) #取得需要刪除的ID
+        if str(all_data["file_id"]) not in data["file_ids"]:
+            delete_file_ids.append(all_data["file_id"]) #取得需要刪除的ID
         else:
             exist_file_ids.append(all_data["file_id"]) #取得需要存在的file_id
-
     #print(exist_file_ids)
-    #print(delete_ids)
+    #print(delete_file_ids)
 
     #刪除資料
-    for delete_id in delete_ids:
-        delete_data = proweb_file_data.objects.get(id=delete_id)
-        #刪除實際檔案(未)
-
-        delete_data.delete()
+    for delete_id in delete_file_ids:
+        delete_data = proweb_file_data.objects.get(file_id=delete_id)
+        #刪除實際檔案
+        get_file_data = proweb_file.objects.get(id=delete_id)
+        #檔案名稱
+        file_name = get_file_data.file_name
+        #檔案儲存路徑
+        user_file_path = get_file_data.path
+        #檔案實際路徑
+        file_path = os.path.join("media",user_file_path,file_name)
+        try:
+            os.remove(file_path)
+            #刪除資料表檔案
+            get_file_data.delete()
+            delete_data.delete()
+        except OSError as e:
+            message = e
     
     #新增資料
-    if "file_ids" in data:
+    if data["data_id"] != "" and data["data_type"] != "" and "file_ids" in data:
         for file_id in data["file_ids"]:
-            if file_id not in exist_file_ids: #判斷file_id是否存在
+            if int(file_id) not in exist_file_ids: #判斷file_id是否存在
                 insert_data = proweb_file_data()
                 insert_data.data_id = data["data_id"]
                 insert_data.data_type = data["data_type"]
@@ -143,22 +156,144 @@ def updateFileData(data):
     #print(return_data)
     return return_data
 
-######################################## 頁面 start ########################################
-#首頁
-def index(request):
-    username = password = ""
-    #登入帳號
-    if "username" in request.session and request.session["username"] != "":
-        username = request.session["username"]
-    #登入密碼
-    if "password" in request.session and request.session["password"] != "":
-        password = request.session["password"]
-    if username != "" and password != "":
-        #跳至頁面-使用者資料
-        return redirect("/user/user_data/edit")
+#取得代碼
+def getCode(conds={},return_col=""):
+    data = {}
+    #依搜尋條件取得代碼資料
+    code_datas = proweb_code.objects.filter(**conds).values()
+    for code_data in code_datas:
+        #id
+        code_id = 0
+        if "id" in code_data and code_data["id"] > 0:
+            code_id = code_data["id"]
+
+            #回傳資料
+            if return_col != "":
+                if return_col in code_data:
+                    data[code_id] = code_data[return_col]
+            else:
+                data[code_id] = code_data
+    #print(data)
+    return data
+
+#依類型取得代碼選項
+def getCodeOptions(code_type="",is_all=False):
+    data = {}
+    if is_all:
+        data[""] = "全部"
+
+    conds = {}
+    conds["types"] = code_type
+    conds["is_delete"] = 0
+    code_datas = getCode(conds,"cname")
+    for key,val in code_datas.items():
+        data[key] = val
+    
+    #print(data)
+    return data
+
+#分頁
+def getPage(request,cur_page="",datas={}):
+    #分頁
+    from django.core.paginator import Paginator
+    #設定檔
+    from django.conf import settings
+
+    page_data = {}
+    
+    #預設第一頁
+    if cur_page == "":
+        cur_page = 1
+
+    p = Paginator(datas,settings.GLOBAL_PAGE_NUM)
+    #資料總數
+    page_data["count"] = p.count
+    #總頁數
+    page_data["num_pages"] = p.num_pages
+    #頁碼的列表
+    page_data["page_range"] = p.page_range
+    #目前頁數
+    page_data["cur_page"] = cur_page
+    this_page = p.page(cur_page)
+    #是否有前一頁
+    if this_page.has_previous():
+        #前一頁的頁碼
+        page_data["previous_page_number"] = this_page.previous_page_number()
     else:
-        #跳至頁面-登入
-        return redirect("/user/login")
+        page_data["previous_page_number"] = cur_page
+    #是否有後一頁
+    if this_page.has_next():
+        #後一頁的頁碼
+        page_data["next_page_number"] = this_page.next_page_number()
+    else:
+        page_data["next_page_number"] = cur_page
+    #目前頁面資料
+    page_data["list_data"] = this_page.object_list
+
+    return page_data
+
+#取得最後編號
+def getSerial(conds={}):
+    serial_num = 0
+    try:
+        datas = proweb_product.objects.filter(**conds).order_by("-serial_num")[:1]
+        for data in datas:
+            serial_num = data.serial_num
+    except:
+        pass
+
+    #print(serial_num)
+    return serial_num
+
+######################################## 共用函式 end ########################################
+
+
+
+######################################## 頁面 start ########################################
+#我的頁面
+def my_page(request,short_link=""):
+    #取得網址及目前頁數
+    cur_page = 1
+    if request.method == "GET":
+        if "cur_page" in request.GET and request.GET["cur_page"] != "":
+            cur_page = request.GET["cur_page"]
+    
+    if short_link != "":
+        #排序
+        orderby = "serial"
+        try:
+            user_data = proweb_user.objects.get(short_link=short_link)
+            #取得使用者資料
+            if user_data.user_id > 0:
+                try:
+                    conds = {}
+                    conds["user_id"] = user_data.user_id
+                    conds["is_delete"] = 0
+                    conds["is_display"] = 1
+                    #取得資料
+                    all_datas = proweb_product.objects.filter(**conds).order_by(orderby).values()
+                    #取得分頁
+                    page_data = getPage(request,cur_page,all_datas)
+                    if "list_data" in page_data:
+                        datas = page_data["list_data"]
+                        for data in datas:
+                            #圖片路徑
+                            file_path = ""
+                            #取得檔案
+                            conds = {}
+                            conds["data_id"] = data["id"]
+                            conds["data_type"] = "product"
+                            file_datas = getFileData(conds,True)
+                            for key,val in file_datas.items():
+                                if file_path == "":
+                                    file_path = "/media/"+val["path"]+"/"+val["file_name"]
+                            data["file_path"] = file_path
+                        
+                except:
+                    pass
+        except:
+            pass
+        return render(request,"my_page.html",locals())
 
 #登入
 def login(request):
@@ -226,36 +361,44 @@ def user_data(request,action_type="add"):
         #性別-預設男
         checked_sex_1 = "checked"
     elif action_type == "edit": #編輯
-        title_txt = "會員資料"
-        #隱藏欄位
-        edit_none = edit_pass_none = "none"
-        #隱藏按鈕-刪除帳號
-        btn_none = "none"
-        #取得使用者
-        try:
-            auth_user = User.objects.get(username=username,password=password)
-            #取得使用者資料
-            if auth_user.id > 0:
-                try:
-                    data = proweb_user.objects.get(user_id=auth_user.id)
-                    #性別
-                    if data.sex == 2:
-                        checked_sex_2 = "checked"
-                    else:
-                        checked_sex_1 = "checked"
-                except:
-                    pass
-        except:
-            pass
+        if username != "" and password != "":
+            title_txt = "會員資料"
+            #隱藏欄位
+            edit_none = edit_pass_none = "none"
+            #隱藏按鈕-刪除帳號
+            btn_none = "none"
+            #取得使用者
+            try:
+                auth_user = User.objects.get(username=username,password=password)
+                #取得使用者資料
+                if auth_user.id > 0:
+                    try:
+                        data = proweb_user.objects.get(user_id=auth_user.id)
+                        #性別
+                        if data.sex == 2:
+                            checked_sex_2 = "checked"
+                        else:
+                            checked_sex_1 = "checked"
+                    except:
+                        pass
+            except:
+                pass
+        else:
+            #跳至頁面-登入
+            return redirect("/user/login")
     elif action_type == "edit_password": #修改密碼
-        title_txt = "修改密碼"
-        #隱藏欄位
-        edit_none = edit_data_none = "none"
-        #取得使用者
-        try:
-            auth_user = User.objects.get(username=username,password=password)
-        except:
-            pass   
+        if username != "" and password != "":
+            title_txt = "修改密碼"
+            #隱藏欄位
+            edit_none = edit_data_none = "none"
+            #取得使用者
+            try:
+                auth_user = User.objects.get(username=username,password=password)
+            except:
+                pass   
+        else:
+            #跳至頁面-登入
+            return redirect("/user/login")
     return render(request,"user_data.html",locals())
 
 #忘記密碼
@@ -345,12 +488,42 @@ def ajax_upload(request):
     #print(return_data)
     return JsonResponse(return_data)
 
+#AJAX-刪除上傳檔案
+def ajax_upload_delete(request):
+    import os
+    error = True
+    message = "請確認資料！"
+    if request.method == "POST":
+        if "file_id" in request.POST and int(request.POST["file_id"]) > 0:
+            file_id = int(request.POST["file_id"])
+            try:
+                data = proweb_file.objects.get(id=file_id)
+                #檔案名稱
+                file_name = data.file_name
+                #檔案儲存路徑
+                user_file_path = data.path
+                #檔案實際路徑
+                file_path = os.path.join("media",user_file_path,file_name)
+                try:
+                    os.remove(file_path)
+                    #刪除資料表檔案
+                    data.delete()
+                    error = False
+                except OSError as e:
+                    message = e
+            except:
+                message = "檔案不存在！"
+
+    return_data = {"error":error,"message":message}
+    #print(return_data)
+    return JsonResponse(return_data)
+
 #AJAX-檢查使用者帳號是否已存在
 def ajax_user_exist(request):
     error = True
     message = "請確認資料！"
     if request.method == "POST":
-        post_username = post_email = ""
+        post_username = ""
         if "username" in request.POST and request.POST["username"].strip() != "":
             post_username = request.POST["username"].strip()
         else:
@@ -364,6 +537,57 @@ def ajax_user_exist(request):
             except:
                 error = False
                 message = "帳號可新增！"
+
+    return_data = {"error":error,"message":message}
+    #print(return_data)
+    return JsonResponse(return_data)
+
+#AJAX-檢查商品頁面網址是否已存在
+def ajax_user_link_exist(request):
+    error = True
+    message = "請確認資料！"
+    if request.method == "POST":
+        post_user_id = 0
+        #登入帳號
+        if "username" in request.session and request.session["username"] != "":
+            post_username = request.session["username"]
+            
+            try:
+                auth_user = User.objects.get(username=post_username)
+                if auth_user is not None and auth_user.is_active:
+                    post_user_id = auth_user.id
+            except:
+                pass
+        
+        #商品頁面網址
+        post_link = ""
+        if "short_link" in request.POST and request.POST["short_link"].strip() != "":
+            post_link = request.POST["short_link"].strip()
+        else:
+            message = "請輸入商品頁面網址！"
+            pass
+        
+        if post_link != "":
+            count = 0
+            isCount = False
+            if post_user_id > 0: #編輯
+                try:
+                    count = proweb_user.objects.filter(short_link=post_link,is_delete=0).exclude(user_id=post_user_id).count()
+                    isCount = True
+                except:
+                    pass
+            else:
+                try:
+                    count = proweb_user.objects.filter(short_link=post_link,is_delete=0).count()
+                    isCount = True
+                except:
+                    pass 
+
+            if not isCount or count > 0:
+                message = "商品頁面網址已存在！"
+            else:
+                error = False
+                message = "商品頁面網址可新增！"
 
     return_data = {"error":error,"message":message}
     #print(return_data)

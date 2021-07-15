@@ -8,106 +8,18 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib import auth
 #商品資料
-from product.models import proweb_code,proweb_product
-#檔案資料
-from user.views import getFileData,updateFileData
+from product.models import proweb_product
+#取得共用函式
+from user.views import *
 
 import datetime
 
-# Create your views here.
-#取得代碼
-def getCode(conds={},return_col=""):
-    data = {}
-    #依搜尋條件取得代碼資料
-    code_datas = proweb_code.objects.filter(**conds).values()
-    for code_data in code_datas:
-        #id
-        code_id = 0
-        if "id" in code_data and code_data["id"] > 0:
-            code_id = code_data["id"]
-
-            #回傳資料
-            if return_col != "":
-                if return_col in code_data:
-                    data[code_id] = code_data[return_col]
-            else:
-                data[code_id] = code_data
-    #print(data)
-    return data
-
-#依類型取得代碼選項
-def getCodeOptions(code_type="",is_all=False):
-    data = {}
-    if is_all:
-        data[""] = "全部"
-
-    conds = {}
-    conds["types"] = code_type
-    conds["is_delete"] = 0
-    code_datas = getCode(conds,"cname")
-    for key,val in code_datas.items():
-        data[key] = val
-    
-    #print(data)
-    return data
-
-#分頁
-def getPage(request,cur_page="",datas={}):
-    #分頁
-    from django.core.paginator import Paginator
-    #設定檔
-    from django.conf import settings
-
-    page_data = {}
-    
-    #預設第一頁
-    if cur_page == "":
-        cur_page = 1
-
-    p = Paginator(datas,settings.GLOBAL_PAGE_NUM)
-    #資料總數
-    page_data["count"] = p.count
-    #總頁數
-    page_data["num_pages"] = p.num_pages
-    #頁碼的列表
-    page_data["page_range"] = p.page_range
-    #目前頁數
-    page_data["cur_page"] = cur_page
-    this_page = p.page(cur_page)
-    #是否有前一頁
-    if this_page.has_previous():
-        #前一頁的頁碼
-        page_data["previous_page_number"] = this_page.previous_page_number()
-    else:
-        page_data["previous_page_number"] = cur_page
-    #是否有後一頁
-    if this_page.has_next():
-        #後一頁的頁碼
-        page_data["next_page_number"] = this_page.next_page_number()
-    else:
-        page_data["next_page_number"] = cur_page
-    #目前頁面資料
-    page_data["list_data"] = this_page.object_list
-
-    return page_data
-
-#取得最後編號
-def getSerial(conds={}):
-    serial_num = 0
-    try:
-        datas = proweb_product.objects.filter(**conds).order_by("-serial_num")[:1]
-        for data in datas:
-            serial_num = data.serial_num
-    except:
-        pass
-
-    #print(serial_num)
-    return serial_num
 
 ######################################## 頁面 start ########################################
 #商品列表
 def product_list(request):
     acion = "/product/product_list"
+    username = password = "";
     #登入帳號
     if "username" in request.session and request.session["username"] != "":
         username = request.session["username"]
@@ -161,6 +73,11 @@ def product_list(request):
             #取得使用者資料
             if auth_user.id > 0:
                 try:
+                    user_data = proweb_user.objects.get(user_id=auth_user.id)
+                except:
+                    pass
+
+                try:
                     conds = Q()
                     conds_and = Q()
                     conds_and.connector = "AND"
@@ -189,16 +106,32 @@ def product_list(request):
                             types_name = ""
                             if data["types"] in code_datas and code_datas[data["types"]] != "":
                                 types_name = code_datas[data["types"]]
+                            data["types_name"] = types_name
                             #轉換名稱-是否顯示
                             is_display_name = "否"
                             if data["is_display"] == 1:
                                 is_display_name = "是"
+                            data["is_display_name"] = is_display_name
+                            #圖片路徑
+                            file_path = ""
+                            #取得檔案
+                            conds = {}
+                            conds["data_id"] = data["id"]
+                            conds["data_type"] = "product"
+                            file_datas = getFileData(conds,True)
+                            for key,val in file_datas.items():
+                                if file_path == "":
+                                    file_path = "/media/"+val["path"]+"/"+val["file_name"]
+                            data["file_path"] = file_path
                 except:
                     pass
         except:
             pass
     
-    return render(request,"product_list.html",locals())
+        return render(request,"product_list.html",locals())
+    else:
+        #跳至頁面-登入
+        return redirect("/user/login")
 
 #新增、編輯商品
 def product_data(request,action_type="add"):
@@ -209,7 +142,6 @@ def product_data(request,action_type="add"):
     #登入密碼
     if "password" in request.session and request.session["password"] != "":
         password = request.session["password"]
-    #若有登入帳號及密碼，並點選註冊，則改為編輯帳號頁面
     if username != "" and password != "":
         try:
             auth_user = User.objects.get(username=username,password=password)
@@ -240,14 +172,21 @@ def product_data(request,action_type="add"):
                         if data.is_display == 1:
                             is_display_checked = "checked"
                         
+                        #取得檔案
                         conds = {}
                         conds["data_id"] = data.id
                         conds["data_type"] = "product"
                         file_datas = getFileData(conds,True)
-                        
+
         except:
             pass
-    return render(request,"product_data.html",locals())
+        return render(request,"product_data.html",locals())
+    else:
+        #跳至頁面-登入
+        return redirect("/user/login")
+
+#新增、編輯商品
+#def product_data_view(request,action_type="add"):
 
 ######################################## 頁面 end ########################################
 
