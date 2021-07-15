@@ -2,22 +2,6 @@ from django.db import models
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 
-# Create your models here.
-#代碼表
-class proweb_code(models.Model):
-    types = models.CharField(max_length=100,default="",null=True)
-    code = models.CharField(max_length=30,default="",null=True)
-    name = models.CharField(max_length=100,default="",null=True)
-    cname = models.CharField(max_length=100,default="",null=True)
-    is_delete = models.IntegerField(default=0,null=False)
-    is_display = models.IntegerField(default=1,null=False)
-
-    def __str__(self):
-        return self.id
-    
-    class Meta:
-        db_table = "proweb_code" #定義資料表名稱
-
 #商品資料表
 class proweb_product(models.Model):
     uuid = models.CharField(max_length=50,default="",null=False)
