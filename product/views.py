@@ -185,8 +185,30 @@ def product_data(request,action_type="add"):
         #跳至頁面-登入
         return redirect("/user/login")
 
-#新增、編輯商品
-#def product_data_view(request,action_type="add"):
+#檢視商品
+def product_data_view(request):
+    title_txt = "商品明細"
+    uuid = ""
+    #取得UUID
+    if request.method == "GET":
+        if "uuid" in request.GET and request.GET["uuid"] != "":
+            uuid = request.GET["uuid"]
+            print(uuid)
+        if "short_link" in request.GET and request.GET["short_link"] != "":
+            short_link = request.GET["short_link"]
+            print(short_link)
+
+    #依UUID取得資料
+    if uuid != "":
+        data = proweb_product.objects.get(uuid=uuid)
+        
+        #取得檔案
+        conds = {}
+        conds["data_id"] = data.id
+        conds["data_type"] = "product"
+        file_datas = getFileData(conds,True)
+
+    return render(request,"product_data_view.html",locals())
 
 ######################################## 頁面 end ########################################
 

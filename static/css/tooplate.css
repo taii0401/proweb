@@ -390,6 +390,37 @@ input[type="checkbox"]:focus {
   width: 15px;
 }
 
+.table-detail {
+  border-width:3px;
+  border-style:double;
+  border-color:#3aabd0;
+}
+
+.table-detail td,
+.table-detail th {
+  padding: 15px 20px;
+  vertical-align: middle;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.detail-title {
+  color: #3aabd0;
+  font-size: 1.0rem;
+}
+
+.detail-text {
+  font-size: 1.0rem;
+  font-weight: 500;
+}
+
+.detail-content-div {
+  border-width:3px;
+  border-style:double;
+  border-color:#3aabd0;
+  padding:40px;
+  margin-top:20px;
+}
+
 footer {
   margin-bottom: 35px;
 }
@@ -501,7 +532,6 @@ footer {
 
 .dm-uploader.active {
 	border-color: red;
-
 	border-style: solid;
 }
 
