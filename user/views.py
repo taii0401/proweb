@@ -2,6 +2,8 @@ from django.db import models
 from django.shortcuts import render,redirect
 #JSON
 from django.http import JsonResponse
+#搜尋條件-OR
+from django.db.models import Q
 #使用者權限
 from django.contrib.auth.models import User
 from django.contrib import auth
@@ -252,26 +254,49 @@ def getSerial(conds={}):
 ######################################## 頁面 start ########################################
 #我的頁面
 def my_page(request,short_link=""):
-    #取得網址及目前頁數
+    #排序
+    orderby_datas = {}
+    orderby_datas["serial"] = "編號 遞增"
+    orderby_datas["-serial"] = "編號 遞減"
+    orderby_datas["sales"] = "售價 遞增"
+    orderby_datas["-sales"] = "售價 遞減"
+
+    #取得目前頁數
     cur_page = 1
+    search_get_url = keywords = ""
+    orderby = "serial"
     if request.method == "GET":
         if "cur_page" in request.GET and request.GET["cur_page"] != "":
             cur_page = request.GET["cur_page"]
+        if "keywords" in request.GET and request.GET["keywords"] != "": #關鍵字
+            keywords = request.GET["keywords"].strip()
+            search_get_url += ";keywords="+keywords
+        if "orderby" in request.GET and request.GET["orderby"] != "": #排序
+            orderby = request.GET["orderby"]
+            search_get_url += ";orderby="+orderby
     
     if short_link != "":
-        #排序
-        orderby = "serial"
         try:
             user_data = proweb_user.objects.get(short_link=short_link)
             #取得使用者資料
             if user_data.user_id > 0:
                 try:
-                    conds = {}
-                    conds["user_id"] = user_data.user_id
-                    conds["is_delete"] = 0
-                    conds["is_display"] = 1
+                    conds = Q()
+                    conds_and = Q()
+                    conds_and.connector = "AND"
+                    conds_and.children.append(("user_id",user_data.user_id))
+                    conds_and.children.append(("is_delete",0))
+                    conds_and.children.append(("is_display",1))
+                    if keywords != "": #關鍵字
+                        conds_or = Q()
+                        conds_or.connector = "OR"
+                        conds_or.children.append(("name__icontains",keywords))
+                        conds_or.children.append(("serial__icontains",keywords))
+                        conds.add(conds_or,"AND")
+                    conds.add(conds_and,"AND")
+                    #print(conds)
                     #取得資料
-                    all_datas = proweb_product.objects.filter(**conds).order_by(orderby).values()
+                    all_datas = proweb_product.objects.filter(conds).order_by(orderby).values()
                     #取得分頁
                     page_data = getPage(request,cur_page,all_datas)
                     if "list_data" in page_data:

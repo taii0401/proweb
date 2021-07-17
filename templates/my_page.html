@@ -10,14 +10,13 @@
     .media { margin-bottom: 35px; }
     .media-body { 
         display: flex; 
-        max-height: 200px;
     }
 
     .tm-bg-gray { background-color: #F2F2F2; }
-    .tm-bg-blue { background-color: #6699cc; }
+    .tm-bg-blue { background-color: #3aabd0; }
     
     .tm-text-white { color: #fff; }
-    .tm-text-blue { color: #6e9ece; }
+    .tm-text-blue { color: #3aabd0; }
 
     .tm-description-box { 
         width: 100%;
@@ -53,6 +52,29 @@
 <div class="row tm-content-row tm-mt-big">
     <div class="col-xl-12 col-lg-12 tm-md-12 tm-sm-12 tm-col">
         <div class="bg-white tm-block h-100">
+            <div class="row">
+                <div class="form-group col-md-4 col-sm-12">
+                    <div class="input-group">
+                        <input type="text" id="keywords" name="keywords" class="form-control search_input_data" placeholder="編號、名稱" value="{{ keywords }}">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" onclick="getSearchUrl('/user/my_page/{{ short_link }}');"><i class="fas fa-search"></i></button>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <input type="hidden" id="orderby" name="orderby" class="form-control search_input_data" value="{{ orderby }}">
+                    <div class="dropdown btn-group">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            排序
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            {% for id,name in orderby_datas.items %}
+                            <a class="dropdown-item {% ifequal id orderby %} active {% endifequal %}" href="#" onclick="$('#orderby').val('{{ id }}');getSearchUrl('/user/my_page/{{ short_link }}');">{{ name }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="tm-table-mt tm-table-actions-row">
                 <div class="tm-table-actions-col-left">
                     
@@ -67,7 +89,7 @@
                     <div class="media">
                         <div style="width:180px; height:200px; margin-right:30px;">
                             {% if data.file_path != "" %}
-                            <img src="{{ data.file_path }}" alt="Image" width="180px" height="200px">
+                            <img src="{{ data.file_path }}" width="180px" height="200px">
                             {% endif %}
                         </div>
                         <div class="media-body tm-bg-gray">
@@ -81,7 +103,7 @@
                                 </p>
                             </div>
                             <div class="tm-buy-box">
-                                <a href="#" class="tm-bg-blue tm-text-white tm-buy" onclick="changeForm('/product/product_data/view?uuid={{ data.uuid }}');">檢視</a>
+                                <a href="#" class="tm-bg-blue tm-text-white tm-buy" onclick="changeForm('/product/product_data_view?short_link={{ short_link }};uuid={{ data.uuid }}');">檢視</a>
                                 <span class="tm-text-blue tm-price-tag">${{ data.sales }}</span>
                             </div>
                         </div>
