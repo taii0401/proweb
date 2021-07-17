@@ -96,7 +96,7 @@ function removeArray(arr) {
 }
 
 //上傳檔案
-function upload_file() {
+function uploadFile() {
     $('#drag-and-drop-zone').dmUploader({ 
         url: '/user/ajax_upload/',
         maxFileSize: 3000000, //檔案限制大小-3Megs
@@ -112,29 +112,30 @@ function upload_file() {
             ui_multi_update_file_progress(id, 0, 'warning', false);
         },
         onUploadSuccess: function(id, file, data) { //完成
-            jsdata = JSON.stringify(data);
-            jsdata = JSON.parse(jsdata);
+            if(checkFileCount() != false) { //檢查上傳數量
+                jsdata = JSON.stringify(data);
+                jsdata = JSON.parse(jsdata);
 
-            if(!jsdata.error) {
-                id = jsdata.file_id;
-
-                var template = $('#files-template').text();                
-                template = template.replaceAll('%%file_name%%', file.name);
-                template = template.replaceAll('%%file_id%%', id);
-
-                template = $(template);
-                template.prop('id', 'uploaderFile' + id);
-                template.data('file-id', id);
-
-                $('#files').prepend(template);
-
-                ui_multi_update_file_status(id, 'success', '完成');
-                ui_multi_update_file_progress(id, 100, 'success', false);
-            } else {
-                alert(jsdata.message);
-                return false;
+                if(!jsdata.error) {
+                    id = jsdata.file_id;
+    
+                    var template = $('#files-template').text();                
+                    template = template.replaceAll('%%file_name%%', file.name);
+                    template = template.replaceAll('%%file_id%%', id);
+    
+                    template = $(template);
+                    template.prop('id', 'uploaderFile' + id);
+                    template.data('file-id', id);
+    
+                    $('#files').prepend(template);
+    
+                    ui_multi_update_file_status(id, 'success', '完成');
+                    ui_multi_update_file_progress(id, 100, 'success', false);
+                } else {
+                    alert(jsdata.message);
+                    return false;
+                }
             }
-            
         },
         onUploadError: function(id, xhr, status, message) { //錯誤訊息
             ui_multi_update_file_status(id, 'danger', message);
@@ -152,7 +153,7 @@ function upload_file() {
 }
 
 //刪除上傳檔案
-function delete_file(id,type) {
+function deleteFile(id,type) {
     var yes = confirm("你確定要刪除嗎？");
     if(!yes) {
         return false;
@@ -187,6 +188,19 @@ function delete_file(id,type) {
                 }
             }
         });
+    }
+}
+
+//上傳-限制筆數
+function checkFileCount() {
+    count = 0;
+    $("input[name='file_id[]']").each(function() {
+        count++;
+    });
+
+    if(count >= 6) {
+        alert('上傳不可超過6張圖片！');
+        return false;
     }
 }
 

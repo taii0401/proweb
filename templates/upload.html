@@ -4,7 +4,7 @@
 
         <div class="btn btn-primary btn-block mb-5">
             <span>上傳檔案</span>
-            <input type="file" name="upload_files" />
+            <input type="file" name="upload_files"/>
         </div>
     </div><!-- /uploader -->
 </div>
@@ -18,7 +18,7 @@
                     <p class="mb-2">
                         <strong>{{ val.name }}</strong>
                         <input type="hidden" id="file_id_{{ val.file_id }}" name="file_id[]" value="{{ val.file_id }}" />
-                        <i class="fas fa-trash-alt tm-trash-icon" onclick="delete_file('{{ val.file_id }}','edit');"></i>
+                        <i class="fas fa-trash-alt tm-trash-icon" onclick="deleteFile('{{ val.file_id }}','edit');"></i>
                     </p>
                     <hr class="mt-1 mb-1" />
                 </div>
@@ -46,7 +46,7 @@
             <p class="mb-2">
                 <strong>%%file_name%%</strong> - 狀態: <span class="text-muted">等待</span>
                 <input type="hidden" id="file_id_%%file_id%%" name="file_id[]" value="%%file_id%%" />
-                <i class="fas fa-trash-alt tm-trash-icon" onclick="delete_file('%%file_id%%','add');"></i>
+                <i class="fas fa-trash-alt tm-trash-icon" onclick="deleteFile('%%file_id%%','add');"></i>
             </p>
             <div class="progress mb-2" style="display:none;">
                 <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
