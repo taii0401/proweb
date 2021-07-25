@@ -389,7 +389,7 @@ function userForget() {
             if(response.error == false) {
                 $('#msg_error').css('display','none');
                 showMsg('msg_success',response.message,true);
-                isSuccess = false;
+                isSuccess = true;
             } else if(response.error == true) {
                 $('#msg_success').css('display','none');
                 showMsg('msg_error',response.message,true);
