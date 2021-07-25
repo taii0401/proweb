@@ -168,15 +168,18 @@ def product_data(request,action_type="add"):
                     
                     #依UUID取得資料
                     if uuid != "":
-                        data = proweb_product.objects.get(uuid=uuid)
-                        if data.is_display == 1:
-                            is_display_checked = "checked"
-                        
-                        #取得檔案
-                        conds = {}
-                        conds["data_id"] = data.id
-                        conds["data_type"] = "product"
-                        file_datas = getFileData(conds,True)
+                        try:
+                            data = proweb_product.objects.get(uuid=uuid)
+                            if data.is_display == 1:
+                                is_display_checked = "checked"
+                            
+                            #取得檔案
+                            conds = {}
+                            conds["data_id"] = data.id
+                            conds["data_type"] = "product"
+                            file_datas = getFileData(conds,True)
+                        except:
+                            pass
 
         except:
             pass
@@ -193,20 +196,21 @@ def product_data_view(request):
     if request.method == "GET":
         if "uuid" in request.GET and request.GET["uuid"] != "":
             uuid = request.GET["uuid"]
-            print(uuid)
         if "short_link" in request.GET and request.GET["short_link"] != "":
             short_link = request.GET["short_link"]
-            print(short_link)
 
     #依UUID取得資料
     if uuid != "":
-        data = proweb_product.objects.get(uuid=uuid)
-        
-        #取得檔案
-        conds = {}
-        conds["data_id"] = data.id
-        conds["data_type"] = "product"
-        file_datas = getFileData(conds,True)
+        try:
+            data = proweb_product.objects.get(uuid=uuid)
+            
+            #取得檔案
+            conds = {}
+            conds["data_id"] = data.id
+            conds["data_type"] = "product"
+            file_datas = getFileData(conds,True)
+        except:
+            pass
 
     return render(request,"product_data_view.html",locals())
 
