@@ -304,7 +304,6 @@ function showMsg(div_msg,message,isShowMsg) {
 function userExist(username) {
     //取得csrf_token
     var csrf_token = getCookie('csrftoken');
-    isSuccess = false;
     $.ajax({
         type: 'POST',
         url: '/user/ajax_user_exist/',
@@ -313,31 +312,28 @@ function userExist(username) {
         error: function(xhr) {
             //console.log(xhr);
             alert('傳送錯誤！');
-            isSuccess = false;
+            return false;
         },
         success: function(response) {
             //console.log(response);
             if(response.error == false) {
                 showMsg('msg_success',response.message,true);
-                isSuccess = true;
+                return true;
             } else if(response.error == true) {
                 showMsg('msg_error',response.message,true);
-                isSuccess = false;
+                return false;
             } else {
                 alert('傳送錯誤！');
-                isSuccess = false;
+                return false;
             }
         }
     });
-
-    return isSuccess;
 }
 
 //檢查商品頁面網址是否存在
 function userLinkExist(short_link) {
     //取得csrf_token
     var csrf_token = getCookie('csrftoken');
-    isSuccess = false;
     $.ajax({
         type: 'POST',
         url: '/user/ajax_user_link_exist/',
@@ -346,32 +342,29 @@ function userLinkExist(short_link) {
         error: function(xhr) {
             //console.log(xhr);
             alert('傳送錯誤！');
-            isSuccess = false;
+            return false;
         },
         success: function(response) {
             //console.log(response);
             if(response.error == false) {
                 showMsg('msg_success',response.message,true);
-                isSuccess = true;
+                return true;
             } else if(response.error == true) {
                 showMsg('msg_error',response.message,true);
-                isSuccess = false;
+                return false;
             } else {
                 alert('傳送錯誤！');
-                isSuccess = false;
+                return false;
             }
         }
     });
-
-    return isSuccess;
 }
 
 //忘記密碼
 function userForget() {
-    isSuccess = false;
     //檢查必填
     if(checkRequiredClass('require',true) == false) {
-		isSuccess = false;
+		return false;
 	}
 
     $.ajax({
@@ -382,26 +375,24 @@ function userForget() {
         error: function(xhr) {
             //console.log(xhr);
             alert('傳送錯誤！');
-            isSuccess = false;
+            return false;
         },
         success: function(response) {
             //console.log(response);
             if(response.error == false) {
                 $('#msg_error').css('display','none');
                 showMsg('msg_success',response.message,true);
-                isSuccess = true;
+                return true;
             } else if(response.error == true) {
                 $('#msg_success').css('display','none');
                 showMsg('msg_error',response.message,true);
-                isSuccess = false;
+                return false;
             } else {
                 alert('傳送錯誤！');
-                isSuccess = false;
+                return false;
             }
         }
     });
-
-    return isSuccess;
 }
 
 //送出-使用者資料
@@ -500,18 +491,17 @@ function productSubmit(action_type) {
 		return false;
 	}
 	if(action_type == 'add') { //新增
-        
+        CKEDITOR.instances['content'].updateElement();
+	    CKEDITOR.instances['category'].updateElement();
 	} else if(action_type == 'edit') { //編輯
-        
+        CKEDITOR.instances['content'].updateElement();
+	    CKEDITOR.instances['category'].updateElement();
     } else if(action_type == 'delete' || action_type == 'delete_list') { //刪除、刪除-列表勾選多筆
         var yes = confirm("你確定要刪除嗎？");
         if(!yes) {
             return false;
         }
     }
-
-    CKEDITOR.instances['content'].updateElement();
-	CKEDITOR.instances['category'].updateElement();
 
     $('.form-control').attr('disabled',false);
     
